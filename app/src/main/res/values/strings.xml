@@ -161,4 +161,7 @@
     <string name="notification_title">Skeddy Search</string>
     <string name="notification_searching">Searching (%1$ds)</string>
     <string name="notification_stopped">Stopped</string>
+
+    <!-- CI Test (remove after verification) -->
+    <string name="ci_test">CI works</string>
 </resources>
