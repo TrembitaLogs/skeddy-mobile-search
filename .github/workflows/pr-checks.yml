@@ -1,12 +1,14 @@
-name: PR Checks
+name: CI Checks
 
 on:
+  push:
+    branches: [main, develop]
   pull_request:
     branches: [main, develop]
     types: [opened, synchronize, reopened]
 
 concurrency:
-  group: pr-checks-${{ github.head_ref }}
+  group: ci-${{ github.event_name }}-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 
 jobs:
