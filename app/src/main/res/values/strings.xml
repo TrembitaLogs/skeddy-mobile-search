@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Skeddy</string>
+    <string name="accessibility_service_description">Skeddy monitors Lyft app to track ride information and help you manage your earnings efficiently.</string>
+
+    <!-- Tabs -->
+    <string name="tab_monitor">Monitor</string>
+    <string name="tab_debug">Debug</string>
+
+    <!-- Service Status -->
+    <string name="service_status_title">Accessibility Service Status</string>
+    <string name="monitoring_status_title">Monitoring Status</string>
+    <string name="status_checking">Checking…</string>
+    <string name="status_enabled">ENABLED - Service is running</string>
+    <string name="status_disabled">DISABLED - Please enable in settings</string>
+    <string name="status_running">Running</string>
+    <string name="status_stopped">Stopped</string>
+
+    <!-- Buttons -->
+    <string name="btn_open_accessibility_settings">Open Accessibility Settings</string>
+    <string name="btn_refresh_status">Refresh Status</string>
+    <string name="btn_dump_ui_hierarchy">Dump UI Hierarchy</string>
+    <string name="btn_find_menu_button">Find Menu Button</string>
+    <string name="btn_test_click">Test Click on Node</string>
+    <string name="btn_clear">Clear</string>
+    <string name="btn_start">Start</string>
+    <string name="btn_stop">Stop</string>
+    <string name="btn_test_notification">Test Notification</string>
+
+    <!-- Statistics -->
+    <string name="stats_rides_found">Rides found: %d</string>
+    <string name="stats_last_check">Last check: %s</string>
+    <string name="stats_never_checked">Last check: Never</string>
+    <!-- Section Titles -->
+    <string name="test_actions_title">Test Actions (requires service enabled)</string>
+    <string name="log_output_title">Log Output</string>
+
+    <!-- Log Messages -->
+    <string name="log_empty">Logs will appear here…</string>
+
+    <!-- Notification Permission -->
+    <string name="notification_permission_title">Enable Notifications</string>
+    <string name="notification_permission_rationale">Skeddy needs notification permission to alert you when high-value rides are found. Without this permission, you may miss profitable opportunities.</string>
+    <string name="btn_grant_permission">Grant Permission</string>
+    <string name="btn_not_now">Not Now</string>
+
+    <!-- Accessibility Permission Dialog -->
+    <string name="accessibility_permission_title">Enable Accessibility Service</string>
+    <string name="accessibility_permission_message">Skeddy needs Accessibility Service permission to monitor the Lyft app and detect high-value rides.\n\nWithout this permission, the app cannot function.</string>
+    <string name="btn_open_settings">Open Settings</string>
+    <string name="btn_exit">Exit</string>
+
+    <!-- Content Descriptions -->
+    <string name="cd_status_indicator">Service status indicator</string>
+    <!-- Dialogs -->
+    <string name="dialog_confirm">Confirm</string>
+
+    <!-- Error UI Strings -->
+    <string name="error_title_generic">Error</string>
+    <string name="error_title_lyft_not_found">Lyft Not Found</string>
+    <string name="error_title_accessibility">Accessibility Service</string>
+    <string name="error_title_service_stopped">Service Stopped</string>
+
+    <!-- Error Actions -->
+    <string name="error_action_retry">Retry</string>
+    <string name="error_action_open_lyft">Open Lyft</string>
+    <string name="error_action_ignore">Ignore</string>
+    <string name="error_action_restart">Restart</string>
+
+    <!-- Content Descriptions for Error UI -->
+    <string name="cd_error_icon">Error icon</string>
+    <string name="cd_dismiss_error">Dismiss error message</string>
+
+    <!-- Error Messages (SkeddyError user messages) -->
+    <string name="error_message_lyft_not_found">Lyft Driver not found. Make sure the app is installed.</string>
+    <string name="error_message_menu_not_found">Could not find the menu button. Please try again.</string>
+    <string name="error_message_scheduled_not_found">Could not find the Scheduled Rides section.</string>
+    <string name="error_message_parse_timeout">Timed out. Check your connection and try again.</string>
+    <string name="error_message_database">Data saving error. Please try again.</string>
+    <string name="error_message_service_killed">Monitoring service stopped. Restart monitoring.</string>
+    <string name="error_message_accessibility_not_enabled">Accessibility Service is not enabled. Enable it in Settings.</string>
+    <string name="error_message_accessibility_action_failed">Could not perform action. Please try again.</string>
+    <string name="error_message_unknown_screen">Unknown screen. Return to the Lyft main screen.</string>
+    <string name="error_message_navigation_failed">Could not navigate back. Open Lyft manually.</string>
+    <string name="error_message_system_dialog">System dialog is blocking. Close the dialog and try again.</string>
+    <string name="error_message_your_rides_tab_not_found">Your rides tab not found. Please try again.</string>
+    <string name="error_message_unknown">Something went wrong. Please try again.</string>
+
+    <!-- Server Error Messages -->
+    <string name="error_message_server_unreachable">Unable to reach the server. Please check your internet connection.</string>
+    <string name="error_message_server_unauthorized">Session expired. Please pair your device again.</string>
+    <string name="error_message_server_rate_limited">Too many requests. Please try again later.</string>
+    <string name="error_message_server_validation">Invalid data sent to server.</string>
+    <string name="error_message_server_unavailable">Server is temporarily unavailable. Please try again later.</string>
+    <string name="error_message_server_internal">Server error. Please try again later.</string>
+
+    <!-- Pairing Error Messages -->
+    <string name="error_message_pairing_invalid">Invalid or expired pairing code.</string>
+    <string name="error_message_pairing_used">This pairing code has already been used.</string>
+
+    <!-- Debug -->
+    <string name="btn_test_error">Test Error Display</string>
+
+    <!-- Battery Optimization -->
+    <string name="battery_optimization_title">Battery Optimization</string>
+    <string name="battery_optimization_disabled">Disabled - monitoring works reliably</string>
+    <string name="battery_optimization_enabled">Enabled - monitoring may be interrupted</string>
+    <string name="btn_disable_battery_optimization">Disable Battery Optimization</string>
+    <string name="battery_optimization_dialog_title">Disable Battery Optimization</string>
+    <string name="battery_optimization_dialog_message">For reliable background monitoring, Skeddy needs to be exempt from battery optimization.\n\nThis ensures the app continues to check for high-value rides even when your phone is idle.</string>
+
+    <!-- Pairing Screen -->
+    <string name="pairing_title">Pair with Skeddy Main</string>
+    <string name="pairing_instructions">Enter pairing code from your main app</string>
+    <string name="pairing_hint">Enter 6-digit code</string>
+    <string name="pairing_button">Pair</string>
+    <string name="pairing_error_invalid">Invalid or expired code</string>
+    <string name="pairing_error_already_used">This code has already been used</string>
+    <string name="pairing_error_network">Network error. Check your connection and try again.</string>
+    <string name="pairing_error_unknown">Something went wrong. Please try again.</string>
+    <string name="pairing_success">Successfully paired!</string>
+    <string name="cd_pairing_logo">Skeddy Search logo</string>
+
+    <!-- Setup Required Screen -->
+    <string name="setup_required_title">Accessibility Service Required</string>
+    <string name="setup_required_message">Enable Skeddy Accessibility Service in Settings to start searching.</string>
+    <string name="setup_required_button">Open Settings</string>
+    <string name="cd_warning_icon">Warning icon</string>
+
+    <!-- Force Update Screen -->
+    <string name="force_update_title">Update Required</string>
+    <string name="force_update_message">Your app version is outdated. Please update to continue searching.</string>
+    <string name="force_update_button">Update</string>
+
+    <!-- Monitor Tab - Service Status -->
+    <string name="service_accessibility_enabled">Accessibility Service enabled</string>
+    <string name="service_accessibility_disabled">Accessibility Service disabled</string>
+
+    <!-- Monitor Tab - Search Status -->
+    <string name="search_status_searching">Searching every %1$ds</string>
+    <string name="search_status_stopped">Stopped</string>
+    <string name="search_status_waiting">Waiting for server…</string>
+    <string name="search_status_offline">Server offline</string>
+
+    <!-- Monitor Tab - Stats -->
+    <string name="last_ping_label">Last ping</string>
+    <string name="last_ping_never">Never</string>
+    <string name="current_interval_label">Interval</string>
+    <string name="current_interval_value">%1$ds</string>
+    <string name="rides_found_today_label">Rides found today</string>
+
+    <!-- Search Toggle Toasts -->
+    <string name="search_started">Search started</string>
+    <string name="search_stopped">Search stopped</string>
+
+    <!-- Device Override Errors -->
+    <string name="network_error">Network error. Check your connection and try again.</string>
+    <string name="server_error">Server error. Please try again later.</string>
+
+    <!-- Persistent Notification (Monitoring Channel) -->
+    <string name="notification_title">Skeddy Search</string>
+    <string name="notification_searching">Searching (%1$ds)</string>
+    <string name="notification_stopped">Stopped</string>
+</resources>

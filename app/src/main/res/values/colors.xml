@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+
+    <!-- Status Colors -->
+    <color name="status_running">#FF4CAF50</color>
+    <color name="status_stopped">#FFF44336</color>
+    <color name="status_running_background">#1A4CAF50</color>
+    <color name="status_stopped_background">#1AF44336</color>
+
+    <!-- Ride Card Colors -->
+    <color name="ride_high_value">#FF000000</color>
+    <color name="ride_premium_value">#FFFFC107</color>
+    <color name="ride_super_value">#FF4CAF50</color>
+
+    <!-- Statistics -->
+    <color name="stats_text">#FF757575</color>
+    <color name="log_background">#FFF5F5F5</color>
+
+    <!-- Error Colors -->
+    <color name="error_card_background">#FFFFEBEE</color>
+    <color name="error_text">#FFD32F2F</color>
+    <color name="error_time_text">#FFE57373</color>
+    <color name="error_icon_tint">#FFD32F2F</color>
+
+    <!-- Warning Colors (Battery Optimization) -->
+    <color name="warning_card_background">#FFFFF3E0</color>
+    <color name="warning_text">#FFE65100</color>
+    <color name="warning_icon_tint">#FFFF9800</color>
+</resources>

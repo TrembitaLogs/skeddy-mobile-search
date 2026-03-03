@@ -1,0 +1,72 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "b657fd7e5b8c20b826ac54e6b60cd2af",
+    "entities": [
+      {
+        "tableName": "blacklisted_rides",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`rideKey` TEXT NOT NULL, `price` REAL NOT NULL, `pickupTime` TEXT NOT NULL, `pickupLocation` TEXT NOT NULL, `riderName` TEXT NOT NULL, `dropoffLocation` TEXT NOT NULL, `addedAt` INTEGER NOT NULL, `parsedPickupTimestamp` INTEGER, PRIMARY KEY(`rideKey`))",
+        "fields": [
+          {
+            "fieldPath": "rideKey",
+            "columnName": "rideKey",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "price",
+            "columnName": "price",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pickupTime",
+            "columnName": "pickupTime",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pickupLocation",
+            "columnName": "pickupLocation",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "riderName",
+            "columnName": "riderName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dropoffLocation",
+            "columnName": "dropoffLocation",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "addedAt",
+            "columnName": "addedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "parsedPickupTimestamp",
+            "columnName": "parsedPickupTimestamp",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "rideKey"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b657fd7e5b8c20b826ac54e6b60cd2af')"
+    ]
+  }
+}

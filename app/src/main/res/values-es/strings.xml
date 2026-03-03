@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="accessibility_service_description">Skeddy monitorea la aplicación de Lyft para rastrear información de viajes y ayudarle a gestionar sus ganancias de manera eficiente.</string>
+
+    <!-- Tabs -->
+    <string name="tab_monitor">Monitor</string>
+    <string name="tab_debug">Depuración</string>
+
+    <!-- Service Status -->
+    <string name="service_status_title">Estado del Servicio de Accesibilidad</string>
+    <string name="monitoring_status_title">Estado del Monitoreo</string>
+    <string name="status_checking">Verificando…</string>
+    <string name="status_enabled">ACTIVADO - El servicio está funcionando</string>
+    <string name="status_disabled">DESACTIVADO - Active en configuración</string>
+    <string name="status_running">En ejecución</string>
+    <string name="status_stopped">Detenido</string>
+
+    <!-- Buttons -->
+    <string name="btn_open_accessibility_settings">Abrir Configuración de Accesibilidad</string>
+    <string name="btn_refresh_status">Actualizar Estado</string>
+    <string name="btn_clear">Limpiar</string>
+    <string name="btn_start">Iniciar</string>
+    <string name="btn_stop">Detener</string>
+
+    <!-- Statistics -->
+    <string name="stats_rides_found">Viajes encontrados: %d</string>
+    <string name="stats_last_check">Última verificación: %s</string>
+    <string name="stats_never_checked">Última verificación: Nunca</string>
+
+    <!-- Section Titles -->
+    <string name="log_output_title">Salida de Registros</string>
+
+    <!-- Log Messages -->
+    <string name="log_empty">Los registros aparecerán aquí…</string>
+
+    <!-- Notification Permission -->
+    <string name="notification_permission_title">Activar Notificaciones</string>
+    <string name="notification_permission_rationale">Skeddy necesita permiso de notificaciones para alertarle cuando se encuentren viajes de alto valor. Sin este permiso, puede perder oportunidades rentables.</string>
+    <string name="btn_grant_permission">Conceder Permiso</string>
+    <string name="btn_not_now">Ahora No</string>
+
+    <!-- Accessibility Permission Dialog -->
+    <string name="accessibility_permission_title">Activar Servicio de Accesibilidad</string>
+    <string name="accessibility_permission_message">Skeddy necesita permiso del Servicio de Accesibilidad para monitorear la aplicación de Lyft y detectar viajes de alto valor.\n\nSin este permiso, la aplicación no puede funcionar.</string>
+    <string name="btn_open_settings">Abrir Configuración</string>
+    <string name="btn_exit">Salir</string>
+
+    <!-- Content Descriptions -->
+    <string name="cd_status_indicator">Indicador de estado del servicio</string>
+
+    <!-- Dialogs -->
+    <string name="dialog_confirm">Confirmar</string>
+
+    <!-- Error UI Strings -->
+    <string name="error_title_generic">Error</string>
+    <string name="error_title_lyft_not_found">Lyft No Encontrado</string>
+    <string name="error_title_accessibility">Servicio de Accesibilidad</string>
+    <string name="error_title_service_stopped">Servicio Detenido</string>
+
+    <!-- Error Actions -->
+    <string name="error_action_retry">Reintentar</string>
+    <string name="error_action_open_lyft">Abrir Lyft</string>
+    <string name="error_action_ignore">Ignorar</string>
+    <string name="error_action_restart">Reiniciar</string>
+
+    <!-- Content Descriptions for Error UI -->
+    <string name="cd_error_icon">Icono de error</string>
+    <string name="cd_dismiss_error">Cerrar mensaje de error</string>
+
+    <!-- Battery Optimization -->
+    <string name="battery_optimization_title">Optimización de Batería</string>
+    <string name="battery_optimization_disabled">Desactivada - el monitoreo funciona de manera confiable</string>
+    <string name="battery_optimization_enabled">Activada - el monitoreo puede ser interrumpido</string>
+    <string name="btn_disable_battery_optimization">Desactivar Optimización de Batería</string>
+    <string name="battery_optimization_dialog_title">Desactivar Optimización de Batería</string>
+    <string name="battery_optimization_dialog_message">Para un monitoreo confiable en segundo plano, Skeddy necesita estar exento de la optimización de batería.\n\nEsto asegura que la aplicación continúe buscando viajes de alto valor incluso cuando su teléfono esté inactivo.</string>
+
+    <!-- Pairing Screen -->
+    <string name="pairing_title">Emparejar con Skeddy Main</string>
+    <string name="pairing_instructions">Ingrese el codigo de emparejamiento desde su aplicacion principal</string>
+    <string name="pairing_hint">Ingrese el codigo de 6 digitos</string>
+    <string name="pairing_button">Emparejar</string>
+    <string name="pairing_error_invalid">Codigo invalido o expirado</string>
+    <string name="pairing_error_already_used">Este codigo ya ha sido utilizado</string>
+    <string name="pairing_error_network">Error de red. Verifique su conexion e intente nuevamente.</string>
+    <string name="pairing_error_unknown">Algo salio mal. Por favor intente nuevamente.</string>
+    <string name="pairing_success">Emparejado exitosamente!</string>
+    <string name="cd_pairing_logo">Logo de Skeddy Search</string>
+
+    <!-- Setup Required Screen -->
+    <string name="setup_required_title">Se Requiere Servicio de Accesibilidad</string>
+    <string name="setup_required_message">Active el Servicio de Accesibilidad de Skeddy en Configuración para comenzar a buscar.</string>
+    <string name="setup_required_button">Abrir Configuración</string>
+    <string name="cd_warning_icon">Icono de advertencia</string>
+
+    <!-- Force Update Screen -->
+    <string name="force_update_title">Actualización Requerida</string>
+    <string name="force_update_message">Su versión de la aplicación está desactualizada. Por favor actualice para continuar buscando.</string>
+    <string name="force_update_button">Actualizar</string>
+
+    <!-- Error Messages (SkeddyError user messages) -->
+    <string name="error_message_lyft_not_found">Lyft Driver no encontrado. Asegúrese de que la aplicación esté instalada.</string>
+    <string name="error_message_menu_not_found">No se pudo encontrar el botón de menú. Intente nuevamente.</string>
+    <string name="error_message_scheduled_not_found">No se pudo encontrar la sección de viajes programados.</string>
+    <string name="error_message_parse_timeout">Tiempo agotado. Verifique su conexión e intente nuevamente.</string>
+    <string name="error_message_database">Error al guardar datos. Intente nuevamente.</string>
+    <string name="error_message_service_killed">Servicio de monitoreo detenido. Reinicie el monitoreo.</string>
+    <string name="error_message_accessibility_not_enabled">El Servicio de Accesibilidad no está activado. Actívelo en Configuración.</string>
+    <string name="error_message_accessibility_action_failed">No se pudo realizar la acción. Intente nuevamente.</string>
+    <string name="error_message_unknown_screen">Pantalla desconocida. Regrese a la pantalla principal de Lyft.</string>
+    <string name="error_message_navigation_failed">No se pudo regresar. Abra Lyft manualmente.</string>
+    <string name="error_message_system_dialog">Un diálogo del sistema está bloqueando. Cierre el diálogo e intente nuevamente.</string>
+    <string name="error_message_your_rides_tab_not_found">Pestaña de viajes no encontrada. Intente nuevamente.</string>
+    <string name="error_message_unknown">Algo salió mal. Intente nuevamente.</string>
+
+    <!-- Server Error Messages -->
+    <string name="error_message_server_unreachable">No se puede conectar al servidor. Verifique su conexión a internet.</string>
+    <string name="error_message_server_unauthorized">Sesión expirada. Empareje su dispositivo nuevamente.</string>
+    <string name="error_message_server_rate_limited">Demasiadas solicitudes. Intente más tarde.</string>
+    <string name="error_message_server_validation">Datos inválidos enviados al servidor.</string>
+    <string name="error_message_server_unavailable">Servidor temporalmente no disponible. Intente más tarde.</string>
+    <string name="error_message_server_internal">Error del servidor. Intente más tarde.</string>
+
+    <!-- Pairing Error Messages -->
+    <string name="error_message_pairing_invalid">Código de emparejamiento inválido o expirado.</string>
+    <string name="error_message_pairing_used">Este código de emparejamiento ya ha sido utilizado.</string>
+
+    <!-- Monitor Tab - Service Status -->
+    <string name="service_accessibility_enabled">Servicio de Accesibilidad activado</string>
+    <string name="service_accessibility_disabled">Servicio de Accesibilidad desactivado</string>
+
+    <!-- Monitor Tab - Search Status -->
+    <string name="search_status_searching">Buscando cada %1$ds</string>
+    <string name="search_status_stopped">Detenido</string>
+    <string name="search_status_waiting">Esperando servidor…</string>
+    <string name="search_status_offline">Servidor desconectado</string>
+
+    <!-- Monitor Tab - Stats -->
+    <string name="last_ping_label">Último ping</string>
+    <string name="last_ping_never">Nunca</string>
+    <string name="current_interval_label">Intervalo</string>
+    <string name="current_interval_value">%1$ds</string>
+    <string name="rides_found_today_label">Viajes encontrados hoy</string>
+
+    <!-- Search Toggle Toasts -->
+    <string name="search_started">Búsqueda iniciada</string>
+    <string name="search_stopped">Búsqueda detenida</string>
+
+    <!-- Device Override Errors -->
+    <string name="network_error">Error de red. Verifique su conexión e intente nuevamente.</string>
+    <string name="server_error">Error del servidor. Por favor intente más tarde.</string>
+
+    <!-- Persistent Notification (Monitoring Channel) -->
+    <string name="notification_title">Skeddy Search</string>
+    <string name="notification_searching">Buscando (%1$ds)</string>
+    <string name="notification_stopped">Detenido</string>
+</resources>

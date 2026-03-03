@@ -1,0 +1,157 @@
+{
+  "description": "Lyft Scheduled Rides screen UI hierarchy fixture",
+  "capturedAt": "2024-01-15T10:30:00Z",
+  "screenName": "Scheduled Rides",
+  "rootNode": {
+    "className": "android.widget.FrameLayout",
+    "resourceId": "android:id/content",
+    "bounds": {"left": 0, "top": 0, "right": 1080, "bottom": 2340},
+    "children": [
+      {
+        "className": "androidx.recyclerview.widget.RecyclerView",
+        "resourceId": "com.lyft.android.driver:id/scheduled_rides_list",
+        "bounds": {"left": 21, "top": 200, "right": 1059, "bottom": 2200},
+        "children": [
+          {
+            "description": "Ride Card 1 - Standard ride with bonus",
+            "className": "android.widget.FrameLayout",
+            "isClickable": true,
+            "bounds": {"left": 21, "top": 200, "right": 1059, "bottom": 450},
+            "children": [
+              {
+                "className": "android.widget.LinearLayout",
+                "resourceId": "com.lyft.android.driver:id/lyft_text",
+                "children": [
+                  {"className": "android.widget.TextView", "text": "$25.50"},
+                  {"className": "android.widget.TextView", "text": "Incl. $3.60 bonus"}
+                ]
+              },
+              {
+                "className": "android.widget.LinearLayout",
+                "resourceId": "com.lyft.android.driver:id/ride_info",
+                "children": [
+                  {"className": "android.widget.TextView", "text": "Today \u00b7 6:05AM"},
+                  {"className": "android.widget.TextView", "text": "Maida Ter & Maida Way"},
+                  {"className": "android.widget.TextView", "text": "9 min \u2022 3.6 mi"},
+                  {"className": "android.widget.TextView", "text": "East Rd & Leonardville Rd"}
+                ]
+              },
+              {
+                "className": "android.widget.LinearLayout",
+                "children": [
+                  {"className": "android.widget.TextView", "text": "Kathleen"},
+                  {"className": "android.widget.TextView", "text": "Verified"},
+                  {"className": "android.widget.TextView", "text": "5.0"}
+                ]
+              }
+            ]
+          },
+          {
+            "description": "Ride Card 2 - High value ride without bonus",
+            "className": "android.widget.FrameLayout",
+            "isClickable": true,
+            "bounds": {"left": 21, "top": 460, "right": 1059, "bottom": 710},
+            "children": [
+              {
+                "className": "android.widget.LinearLayout",
+                "resourceId": "com.lyft.android.driver:id/lyft_text",
+                "children": [
+                  {"className": "android.widget.TextView", "text": "$85.00"}
+                ]
+              },
+              {
+                "className": "android.widget.LinearLayout",
+                "resourceId": "com.lyft.android.driver:id/ride_info",
+                "children": [
+                  {"className": "android.widget.TextView", "text": "Tomorrow \u00b7 8:30AM"},
+                  {"className": "android.widget.TextView", "text": "Newark Airport Terminal B"},
+                  {"className": "android.widget.TextView", "text": "45 min \u2022 28.5 mi"},
+                  {"className": "android.widget.TextView", "text": "Manhattan, Park Ave & 42nd St"}
+                ]
+              },
+              {
+                "className": "android.widget.LinearLayout",
+                "children": [
+                  {"className": "android.widget.TextView", "text": "Michael"},
+                  {"className": "android.widget.TextView", "text": "4.9"}
+                ]
+              }
+            ]
+          },
+          {
+            "description": "Ride Card 3 - Budget ride with large bonus",
+            "className": "android.widget.FrameLayout",
+            "isClickable": true,
+            "bounds": {"left": 21, "top": 720, "right": 1059, "bottom": 970},
+            "children": [
+              {
+                "className": "android.widget.LinearLayout",
+                "resourceId": "com.lyft.android.driver:id/lyft_text",
+                "children": [
+                  {"className": "android.widget.TextView", "text": "$12.75"},
+                  {"className": "android.widget.TextView", "text": "Incl. $5.00 bonus"}
+                ]
+              },
+              {
+                "className": "android.widget.LinearLayout",
+                "resourceId": "com.lyft.android.driver:id/ride_info",
+                "children": [
+                  {"className": "android.widget.TextView", "text": "Today \u00b7 2:15PM"},
+                  {"className": "android.widget.TextView", "text": "Main St & Oak Ave"},
+                  {"className": "android.widget.TextView", "text": "5 min \u2022 1.2 mi"},
+                  {"className": "android.widget.TextView", "text": "Downtown Mall, Entrance C"}
+                ]
+              },
+              {
+                "className": "android.widget.LinearLayout",
+                "children": [
+                  {"className": "android.widget.TextView", "text": "Sarah"},
+                  {"className": "android.widget.TextView", "text": "Verified"},
+                  {"className": "android.widget.TextView", "text": "4.7"}
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "expectedRides": [
+    {
+      "price": 25.50,
+      "bonus": 3.60,
+      "pickupTime": "Today \u00b7 6:05AM",
+      "pickupLocation": "Maida Ter & Maida Way",
+      "dropoffLocation": "East Rd & Leonardville Rd",
+      "duration": "9 min",
+      "distance": "3.6 mi",
+      "riderName": "Kathleen",
+      "riderRating": 5.0,
+      "isVerified": true
+    },
+    {
+      "price": 85.00,
+      "bonus": null,
+      "pickupTime": "Tomorrow \u00b7 8:30AM",
+      "pickupLocation": "Newark Airport Terminal B",
+      "dropoffLocation": "Manhattan, Park Ave & 42nd St",
+      "duration": "45 min",
+      "distance": "28.5 mi",
+      "riderName": "Michael",
+      "riderRating": 4.9,
+      "isVerified": false
+    },
+    {
+      "price": 12.75,
+      "bonus": 5.00,
+      "pickupTime": "Today \u00b7 2:15PM",
+      "pickupLocation": "Main St & Oak Ave",
+      "dropoffLocation": "Downtown Mall, Entrance C",
+      "duration": "5 min",
+      "distance": "1.2 mi",
+      "riderName": "Sarah",
+      "riderRating": 4.7,
+      "isVerified": true
+    }
+  ]
+}
