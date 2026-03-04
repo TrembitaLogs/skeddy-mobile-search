@@ -26,6 +26,8 @@ node_modules/
 
 # Android
 local.properties
+*.jks
+*.keystore
 *.iml
 .gradle/
 build/

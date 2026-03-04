@@ -27,6 +27,9 @@ jobs:
           echo "version_code=$VERSION_CODE" >> "$GITHUB_OUTPUT"
           echo "tag=v$TAG" >> "$GITHUB_OUTPUT"
 
+      - name: Decode release keystore
+        run: echo "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" | base64 --decode > $GITHUB_WORKSPACE/release.jks
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -40,11 +43,51 @@ jobs:
       - name: Run unit tests
         run: ./gradlew testReleaseUnitTest --no-daemon
 
-      - name: Build release APK
+      - name: Build signed release APK
+        env:
+          KEYSTORE_PATH: ${{ github.workspace }}/release.jks
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           ./gradlew assembleRelease --no-daemon \
             -PversionName=${{ steps.version.outputs.version_name }} \
             -PversionCode=${{ steps.version.outputs.version_code }}
+
+      - name: Upload APK to DigitalOcean Spaces
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.DO_SPACES_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.DO_SPACES_SECRET_ACCESS_KEY }}
+        run: |
+          APK_PATH=$(find app/build/outputs/apk/release -name "*.apk" | head -1)
+
+          if [ -z "$APK_PATH" ]; then
+            echo "ERROR: No APK found in app/build/outputs/apk/release/"
+            exit 1
+          fi
+
+          VERSION="${{ steps.version.outputs.version_name }}"
+          ENDPOINT="https://sfo3.digitaloceanspaces.com"
+          BUCKET="skeddy-search-releases"
+
+          # Upload as "latest" (fixed URL, short cache for quick propagation)
+          aws s3 cp "$APK_PATH" \
+            "s3://${BUCKET}/search/skeddy-search-latest.apk" \
+            --endpoint-url "$ENDPOINT" \
+            --acl public-read \
+            --content-type "application/vnd.android.package-archive" \
+            --cache-control "max-age=300, must-revalidate"
+
+          # Upload versioned copy (immutable, long cache)
+          aws s3 cp "$APK_PATH" \
+            "s3://${BUCKET}/search/skeddy-search-v${VERSION}.apk" \
+            --endpoint-url "$ENDPOINT" \
+            --acl public-read \
+            --content-type "application/vnd.android.package-archive" \
+            --cache-control "max-age=86400"
+
+          echo "Uploaded latest:    search/skeddy-search-latest.apk"
+          echo "Uploaded versioned: search/skeddy-search-v${VERSION}.apk"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -53,3 +96,7 @@ jobs:
           name: Release ${{ steps.version.outputs.tag }}
           generate_release_notes: true
           files: app/build/outputs/apk/release/*.apk
+
+      - name: Cleanup keystore
+        if: always()
+        run: rm -f $GITHUB_WORKSPACE/release.jks
