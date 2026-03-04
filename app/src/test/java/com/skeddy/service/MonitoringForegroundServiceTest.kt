@@ -83,6 +83,13 @@ class MonitoringForegroundServiceTest {
 
     @After
     fun tearDown() {
+        // Stop monitoring to cancel coroutines and handler callbacks
+        if (service.isMonitoringActive()) {
+            service.stopMonitoring()
+        }
+        // Drain any pending looper messages from this test
+        shadowLooper.idle()
+
         Settings.Secure.putString(
             RuntimeEnvironment.getApplication().contentResolver,
             Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
