@@ -2,7 +2,7 @@ package com.skeddy.network
 
 import com.skeddy.network.models.DeviceOverrideRequest
 import com.skeddy.network.models.DeviceHealth
-import com.skeddy.network.models.PairingRequest
+import com.skeddy.network.models.SearchLoginRequest
 import com.skeddy.network.models.PingRequest
 import com.skeddy.network.models.PingStats
 import com.skeddy.network.models.RideData
@@ -163,38 +163,39 @@ class SkeddyApiTest {
 
     // endregion
 
-    // region confirmPairing()
+    // region searchLogin()
 
     @Test
-    fun `confirmPairing sends POST to api v1 pairing confirm`() = runBlocking {
-        enqueuePairingResponse()
+    fun `searchLogin sends POST to api v1 auth search-login`() = runBlocking {
+        enqueueLoginResponse()
 
-        api.confirmPairing(createPairingRequest())
+        api.searchLogin(createSearchLoginRequest())
 
         val recorded = mockWebServer.takeRequest(1, TimeUnit.SECONDS)!!
         assertEquals("POST", recorded.method)
-        assertEquals("/api/v1/pairing/confirm", recorded.path)
+        assertEquals("/api/v1/auth/search-login", recorded.path)
     }
 
     @Test
-    fun `confirmPairing request body contains correct JSON with snake_case fields`() = runBlocking {
-        enqueuePairingResponse()
+    fun `searchLogin request body contains correct JSON with snake_case fields`() = runBlocking {
+        enqueueLoginResponse()
 
-        api.confirmPairing(createPairingRequest())
+        api.searchLogin(createSearchLoginRequest())
 
         val recorded = mockWebServer.takeRequest(1, TimeUnit.SECONDS)!!
         val body = json.parseToJsonElement(recorded.body.readUtf8()).jsonObject
 
-        assertEquals("123456", body["code"]!!.jsonPrimitive.content)
+        assertEquals("user@example.com", body["email"]!!.jsonPrimitive.content)
+        assertEquals("password123", body["password"]!!.jsonPrimitive.content)
         assertEquals("test-device-id", body["device_id"]!!.jsonPrimitive.content)
         assertEquals("America/New_York", body["timezone"]!!.jsonPrimitive.content)
     }
 
     @Test
-    fun `confirmPairing response parses correctly`() = runBlocking {
-        enqueuePairingResponse()
+    fun `searchLogin response parses correctly`() = runBlocking {
+        enqueueLoginResponse()
 
-        val response = api.confirmPairing(createPairingRequest())
+        val response = api.searchLogin(createSearchLoginRequest())
 
         assertTrue(response.isSuccessful)
         val body = response.body()!!
@@ -360,7 +361,7 @@ class SkeddyApiTest {
         )
     }
 
-    private fun enqueuePairingResponse() {
+    private fun enqueueLoginResponse() {
         mockWebServer.enqueue(
             MockResponse()
                 .setResponseCode(200)
@@ -408,8 +409,9 @@ class SkeddyApiTest {
         )
     )
 
-    private fun createPairingRequest() = PairingRequest(
-        code = "123456",
+    private fun createSearchLoginRequest() = SearchLoginRequest(
+        email = "user@example.com",
+        password = "password123",
         deviceId = "test-device-id",
         timezone = "America/New_York"
     )

@@ -41,8 +41,8 @@ class DeviceTokenManager @VisibleForTesting internal constructor(
     }
 
     /**
-     * Saves the device token received from pairing confirmation.
-     * @param token the device token from POST /pairing/confirm response.
+     * Saves the device token received from login.
+     * @param token the device token from POST /auth/search-login response.
      */
     fun saveDeviceToken(token: String) {
         prefs.edit().putString(KEY_DEVICE_TOKEN, token).apply()
@@ -51,7 +51,7 @@ class DeviceTokenManager @VisibleForTesting internal constructor(
 
     /**
      * Clears the stored device token.
-     * Called on 401/403 server responses to trigger re-pairing.
+     * Called on 401/403 server responses to trigger re-login.
      */
     fun clearDeviceToken() {
         prefs.edit().remove(KEY_DEVICE_TOKEN).apply()
@@ -59,10 +59,10 @@ class DeviceTokenManager @VisibleForTesting internal constructor(
     }
 
     /**
-     * Checks whether a device token is stored (device is paired).
+     * Checks whether a device token is stored (user is logged in).
      * @return true if device token exists.
      */
-    fun isPaired(): Boolean = getDeviceToken() != null
+    fun isLoggedIn(): Boolean = getDeviceToken() != null
 
     /**
      * Returns the unique device identifier (Settings.Secure.ANDROID_ID).

@@ -9,7 +9,7 @@ import androidx.room.RoomDatabase
  * Room Database for blacklisted rides used for local deduplication.
  *
  * Separate from the main AppDatabase because the blacklist has an independent
- * lifecycle — it is cleared on re-pairing and has its own TTL-based cleanup.
+ * lifecycle — it is cleared on re-login and has its own TTL-based cleanup.
  *
  * Uses singleton pattern for thread-safe access.
  * Schema export is enabled for migration tracking.

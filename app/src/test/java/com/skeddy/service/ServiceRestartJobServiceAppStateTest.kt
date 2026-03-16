@@ -26,8 +26,8 @@ import org.robolectric.annotation.Config
  * Test cases (from task 24.4 test strategy):
  * 1. FORCE_UPDATE -> verify startMonitoringService()
  * 2. NOT_CONFIGURED -> verify clearMonitoringFlag()
- * 3. NOT_PAIRED -> verify clearMonitoringFlag() and service NOT started
- * 4. PAIRED -> verify startMonitoringService()
+ * 3. NOT_LOGGED_IN -> verify clearMonitoringFlag() and service NOT started
+ * 4. LOGGED_IN -> verify startMonitoringService()
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34], manifest = Config.NONE)
@@ -63,10 +63,10 @@ class ServiceRestartJobServiceAppStateTest {
         ServiceRestartJobService.clearMonitoringFlag(context)
     }
 
-    // ==================== PAIRED State ====================
+    // ==================== LOGGED_IN State ====================
 
     @Test
-    fun `PAIRED state restarts MonitoringForegroundService`() {
+    fun `LOGGED_IN state restarts MonitoringForegroundService`() {
         setUpForRestart()
         deviceTokenManager.saveDeviceToken("test-token")
         enableAccessibility()
@@ -74,7 +74,7 @@ class ServiceRestartJobServiceAppStateTest {
         val result = service.onStartJob(null)
 
         val startedService = shadowOf(RuntimeEnvironment.getApplication()).nextStartedService
-        assertNotNull("Service should be restarted in PAIRED state", startedService)
+        assertNotNull("Service should be restarted in LOGGED_IN state", startedService)
         assertFalse("onStartJob should return false (job complete)", result)
     }
 
@@ -95,29 +95,29 @@ class ServiceRestartJobServiceAppStateTest {
         assertFalse("onStartJob should return false (job complete)", result)
     }
 
-    // ==================== NOT_PAIRED State ====================
+    // ==================== NOT_LOGGED_IN State ====================
 
     @Test
-    fun `NOT_PAIRED state does not restart service`() {
+    fun `NOT_LOGGED_IN state does not restart service`() {
         setUpForRestart()
-        // No device token -> NOT_PAIRED
+        // No device token -> NOT_LOGGED_IN
 
         val result = service.onStartJob(null)
 
         val startedService = shadowOf(RuntimeEnvironment.getApplication()).nextStartedService
-        assertNull("Service should NOT be restarted in NOT_PAIRED state", startedService)
+        assertNull("Service should NOT be restarted in NOT_LOGGED_IN state", startedService)
         assertFalse("onStartJob should return false", result)
     }
 
     @Test
-    fun `NOT_PAIRED state clears monitoring flag`() {
+    fun `NOT_LOGGED_IN state clears monitoring flag`() {
         setUpForRestart()
-        // No device token -> NOT_PAIRED
+        // No device token -> NOT_LOGGED_IN
 
         service.onStartJob(null)
 
         assertFalse(
-            "Monitoring flag should be cleared for NOT_PAIRED",
+            "Monitoring flag should be cleared for NOT_LOGGED_IN",
             ServiceRestartJobService.wasMonitoringActive(context)
         )
     }

@@ -19,92 +19,89 @@ import org.robolectric.RuntimeEnvironment
 import org.robolectric.Shadows.shadowOf
 
 @RunWith(RobolectricTestRunner::class)
-class PairingActivityTest {
+class LoginActivityTest {
 
-    // ==================== Code Validation (Pure Logic) ====================
+    // ==================== Form Validation (Pure Logic) ====================
 
     @Test
-    fun `isCodeValid returns true for exactly 6 digits`() {
-        assertTrue(PairingActivity.isCodeValid("123456"))
+    fun `isFormValid returns true for valid email and non-empty password`() {
+        assertTrue(LoginActivity.isFormValid("user@example.com", "password123"))
     }
 
     @Test
-    fun `isCodeValid returns true for all zeros`() {
-        assertTrue(PairingActivity.isCodeValid("000000"))
+    fun `isFormValid returns false for invalid email`() {
+        assertFalse(LoginActivity.isFormValid("not-an-email", "password123"))
     }
 
     @Test
-    fun `isCodeValid returns true for all nines`() {
-        assertTrue(PairingActivity.isCodeValid("999999"))
+    fun `isFormValid returns false for empty email`() {
+        assertFalse(LoginActivity.isFormValid("", "password123"))
     }
 
     @Test
-    fun `isCodeValid returns false for 5 digits`() {
-        assertFalse(PairingActivity.isCodeValid("12345"))
+    fun `isFormValid returns false for null email`() {
+        assertFalse(LoginActivity.isFormValid(null, "password123"))
     }
 
     @Test
-    fun `isCodeValid returns false for 7 digits`() {
-        assertFalse(PairingActivity.isCodeValid("1234567"))
+    fun `isFormValid returns false for empty password`() {
+        assertFalse(LoginActivity.isFormValid("user@example.com", ""))
     }
 
     @Test
-    fun `isCodeValid returns false for empty string`() {
-        assertFalse(PairingActivity.isCodeValid(""))
+    fun `isFormValid returns false for null password`() {
+        assertFalse(LoginActivity.isFormValid("user@example.com", null))
     }
 
     @Test
-    fun `isCodeValid returns false for null`() {
-        assertFalse(PairingActivity.isCodeValid(null))
+    fun `isFormValid returns false for blank email`() {
+        assertFalse(LoginActivity.isFormValid("   ", "password"))
     }
 
     @Test
-    fun `isCodeValid returns false when contains letters`() {
-        assertFalse(PairingActivity.isCodeValid("12345a"))
-    }
-
-    @Test
-    fun `isCodeValid returns false when contains spaces`() {
-        assertFalse(PairingActivity.isCodeValid("123 56"))
-    }
-
-    @Test
-    fun `isCodeValid returns false when contains special characters`() {
-        assertFalse(PairingActivity.isCodeValid("12-456"))
+    fun `isFormValid returns false for blank password`() {
+        assertFalse(LoginActivity.isFormValid("user@example.com", "   "))
     }
 
     // ==================== Button State via TextWatcher ====================
 
     @Test
-    fun `pair button is disabled on initial create`() {
+    fun `login button is disabled on initial create`() {
         val activity = createActivity()
-        assertFalse(activity.findViewById<View>(R.id.pairButton).isEnabled)
+        assertFalse(activity.findViewById<View>(R.id.loginButton).isEnabled)
     }
 
     @Test
-    fun `pair button is enabled when 6 digits entered`() {
+    fun `login button is enabled when valid email and password entered`() {
         val activity = createActivity()
-        activity.findViewById<EditText>(R.id.codeInput).setText("123456")
-        assertTrue(activity.findViewById<View>(R.id.pairButton).isEnabled)
+        activity.findViewById<EditText>(R.id.emailInput).setText("user@example.com")
+        activity.findViewById<EditText>(R.id.passwordInput).setText("password123")
+        assertTrue(activity.findViewById<View>(R.id.loginButton).isEnabled)
     }
 
     @Test
-    fun `pair button is disabled when less than 6 digits`() {
+    fun `login button is disabled when only email entered`() {
         val activity = createActivity()
-        activity.findViewById<EditText>(R.id.codeInput).setText("12345")
-        assertFalse(activity.findViewById<View>(R.id.pairButton).isEnabled)
+        activity.findViewById<EditText>(R.id.emailInput).setText("user@example.com")
+        assertFalse(activity.findViewById<View>(R.id.loginButton).isEnabled)
     }
 
     @Test
-    fun `pair button becomes disabled when valid code is cleared`() {
+    fun `login button is disabled when only password entered`() {
         val activity = createActivity()
-        val input = activity.findViewById<EditText>(R.id.codeInput)
+        activity.findViewById<EditText>(R.id.passwordInput).setText("password123")
+        assertFalse(activity.findViewById<View>(R.id.loginButton).isEnabled)
+    }
 
-        input.setText("123456")
-        assertTrue(activity.findViewById<View>(R.id.pairButton).isEnabled)
+    @Test
+    fun `login button becomes disabled when valid form is cleared`() {
+        val activity = createActivity()
+        activity.findViewById<EditText>(R.id.emailInput).setText("user@example.com")
+        activity.findViewById<EditText>(R.id.passwordInput).setText("password123")
+        assertTrue(activity.findViewById<View>(R.id.loginButton).isEnabled)
 
-        input.setText("")
-        assertFalse(activity.findViewById<View>(R.id.pairButton).isEnabled)
+        activity.findViewById<EditText>(R.id.emailInput).setText("")
+        assertFalse(activity.findViewById<View>(R.id.loginButton).isEnabled)
     }
 
     // ==================== Error Clearing via TextWatcher ====================
@@ -117,7 +114,7 @@ class PairingActivityTest {
         val errorText = activity.findViewById<View>(R.id.errorText)
         assertEquals(View.VISIBLE, errorText.visibility)
 
-        activity.findViewById<EditText>(R.id.codeInput).setText("1")
+        activity.findViewById<EditText>(R.id.emailInput).setText("a")
         assertEquals(View.INVISIBLE, errorText.visibility)
     }
 
@@ -128,18 +125,18 @@ class PairingActivityTest {
 
         assertEquals(View.INVISIBLE, errorText.visibility)
 
-        activity.findViewById<EditText>(R.id.codeInput).setText("1")
+        activity.findViewById<EditText>(R.id.emailInput).setText("a")
         assertEquals(View.INVISIBLE, errorText.visibility)
     }
 
     // ==================== showLoading ====================
 
     @Test
-    fun `showLoading disables and hides pair button`() {
+    fun `showLoading disables and hides login button`() {
         val activity = createActivity()
         activity.showLoading()
 
-        val button = activity.findViewById<View>(R.id.pairButton)
+        val button = activity.findViewById<View>(R.id.loginButton)
         assertFalse(button.isEnabled)
         assertEquals(View.INVISIBLE, button.visibility)
     }
@@ -160,10 +157,11 @@ class PairingActivityTest {
     }
 
     @Test
-    fun `showLoading disables code input`() {
+    fun `showLoading disables email and password inputs`() {
         val activity = createActivity()
         activity.showLoading()
-        assertFalse(activity.findViewById<View>(R.id.codeInput).isEnabled)
+        assertFalse(activity.findViewById<View>(R.id.emailInput).isEnabled)
+        assertFalse(activity.findViewById<View>(R.id.passwordInput).isEnabled)
     }
 
     // ==================== showError ====================
@@ -177,46 +175,48 @@ class PairingActivityTest {
     }
 
     @Test
-    fun `showError shows pair button`() {
+    fun `showError shows login button`() {
         val activity = createActivity()
         activity.showLoading()
         activity.showError("Error message")
-        assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.pairButton).visibility)
+        assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.loginButton).visibility)
     }
 
     @Test
-    fun `showError enables button when code is valid`() {
+    fun `showError enables button when form is valid`() {
         val activity = createActivity()
-        activity.findViewById<EditText>(R.id.codeInput).setText("123456")
+        activity.findViewById<EditText>(R.id.emailInput).setText("user@example.com")
+        activity.findViewById<EditText>(R.id.passwordInput).setText("password123")
         activity.showLoading()
         activity.showError("Error message")
-        assertTrue(activity.findViewById<View>(R.id.pairButton).isEnabled)
+        assertTrue(activity.findViewById<View>(R.id.loginButton).isEnabled)
     }
 
     @Test
-    fun `showError disables button when code is invalid`() {
+    fun `showError disables button when form is invalid`() {
         val activity = createActivity()
-        activity.findViewById<EditText>(R.id.codeInput).setText("123")
+        activity.findViewById<EditText>(R.id.emailInput).setText("invalid")
         activity.showError("Error message")
-        assertFalse(activity.findViewById<View>(R.id.pairButton).isEnabled)
+        assertFalse(activity.findViewById<View>(R.id.loginButton).isEnabled)
     }
 
     @Test
     fun `showError displays error message text`() {
         val activity = createActivity()
-        activity.showError("Invalid code")
+        activity.showError("Invalid credentials")
 
         val errorText = activity.findViewById<TextView>(R.id.errorText)
-        assertEquals("Invalid code", errorText.text.toString())
+        assertEquals("Invalid credentials", errorText.text.toString())
         assertEquals(View.VISIBLE, errorText.visibility)
     }
 
     @Test
-    fun `showError re-enables code input`() {
+    fun `showError re-enables email and password inputs`() {
         val activity = createActivity()
         activity.showLoading()
         activity.showError("Error")
-        assertTrue(activity.findViewById<View>(R.id.codeInput).isEnabled)
+        assertTrue(activity.findViewById<View>(R.id.emailInput).isEnabled)
+        assertTrue(activity.findViewById<View>(R.id.passwordInput).isEnabled)
     }
 
     // ==================== showSuccess ====================
@@ -251,22 +251,22 @@ class PairingActivityTest {
     // ==================== createIntent ====================
 
     @Test
-    fun `createIntent returns intent targeting PairingActivity`() {
+    fun `createIntent returns intent targeting LoginActivity`() {
         val context = RuntimeEnvironment.getApplication()
-        val intent = PairingActivity.createIntent(context)
-        assertEquals(PairingActivity::class.java.name, intent.component?.className)
+        val intent = LoginActivity.createIntent(context)
+        assertEquals(LoginActivity::class.java.name, intent.component?.className)
     }
 
     // ==================== Lifecycle ====================
 
     @Test
-    fun `onDestroy cancels pairing job`() {
-        val controller = Robolectric.buildActivity(PairingActivity::class.java)
+    fun `onDestroy cancels login job`() {
+        val controller = Robolectric.buildActivity(LoginActivity::class.java)
             .create().resume()
         val activity = controller.get()
 
         val job = Job()
-        activity.pairingJob = job
+        activity.loginJob = job
         assertFalse(job.isCancelled)
 
         controller.pause().stop().destroy()
@@ -274,12 +274,12 @@ class PairingActivityTest {
     }
 
     @Test
-    fun `onDestroy is safe when pairingJob is null`() {
-        val controller = Robolectric.buildActivity(PairingActivity::class.java)
+    fun `onDestroy is safe when loginJob is null`() {
+        val controller = Robolectric.buildActivity(LoginActivity::class.java)
             .create().resume()
         val activity = controller.get()
 
-        assertNull(activity.pairingJob)
+        assertNull(activity.loginJob)
 
         // Should not throw
         controller.pause().stop().destroy()
@@ -287,8 +287,8 @@ class PairingActivityTest {
 
     // ==================== Helper ====================
 
-    private fun createActivity(): PairingActivity {
-        return Robolectric.buildActivity(PairingActivity::class.java)
+    private fun createActivity(): LoginActivity {
+        return Robolectric.buildActivity(LoginActivity::class.java)
             .create().resume().get()
     }
 }

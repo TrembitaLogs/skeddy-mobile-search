@@ -154,8 +154,8 @@ class PendingRideQueue @VisibleForTesting internal constructor(
     /**
      * Removes all entries from the queue.
      *
-     * Used during re-pairing to discard pending rides from the
-     * previous pairing context that are no longer relevant.
+     * Used during re-login to discard pending rides from the
+     * previous login context that are no longer relevant.
      */
     fun clear() {
         synchronized(lock) {

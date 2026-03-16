@@ -114,14 +114,14 @@ class AuthInterceptorTest {
         assertEquals("test-device-id", recorded.getHeader("X-Device-ID"))
     }
 
-    // ==================== Pairing Confirm Exclusion ====================
+    // ==================== Search Login Exclusion ====================
 
     @Test
-    fun `does not add auth headers to POST pairing confirm`() {
+    fun `does not add auth headers to POST search login`() {
         mockWebServer.enqueue(MockResponse().setResponseCode(200))
 
         val request = Request.Builder()
-            .url(mockWebServer.url("/api/v1/pairing/confirm"))
+            .url(mockWebServer.url("/api/v1/auth/search-login"))
             .post("{}".toRequestBody(null))
             .build()
         client.newCall(request).execute()
@@ -132,11 +132,11 @@ class AuthInterceptorTest {
     }
 
     @Test
-    fun `exclusion requires POST method — GET to pairing confirm gets headers`() {
+    fun `exclusion requires POST method — GET to search login gets headers`() {
         mockWebServer.enqueue(MockResponse().setResponseCode(200))
 
         val request = Request.Builder()
-            .url(mockWebServer.url("/api/v1/pairing/confirm"))
+            .url(mockWebServer.url("/api/v1/auth/search-login"))
             .get()
             .build()
         client.newCall(request).execute()
@@ -151,7 +151,7 @@ class AuthInterceptorTest {
         mockWebServer.enqueue(MockResponse().setResponseCode(200))
 
         val request = Request.Builder()
-            .url(mockWebServer.url("/pairing/confirm"))
+            .url(mockWebServer.url("/auth/search-login"))
             .post("{}".toRequestBody(null))
             .build()
         client.newCall(request).execute()

@@ -9,16 +9,17 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-class PairingDeviceOverrideModelsTest {
+class SearchLoginDeviceOverrideModelsTest {
 
     private val json = Json { ignoreUnknownKeys = true }
 
-    // --- Test 1: PairingRequest serialization with snake_case for device_id ---
+    // --- Test 1: SearchLoginRequest serialization with snake_case for device_id ---
 
     @Test
-    fun `PairingRequest serializes to JSON with snake_case device_id`() {
-        val request = PairingRequest(
-            code = "482917",
+    fun `SearchLoginRequest serializes to JSON with snake_case device_id`() {
+        val request = SearchLoginRequest(
+            email = "user@example.com",
+            password = "password123",
             deviceId = "android_device_unique_id",
             timezone = "America/New_York"
         )
@@ -26,16 +27,17 @@ class PairingDeviceOverrideModelsTest {
         val jsonString = json.encodeToString(request)
         val jsonObject = json.decodeFromString<JsonObject>(jsonString)
 
-        assertEquals("482917", jsonObject["code"]?.jsonPrimitive?.content)
+        assertEquals("user@example.com", jsonObject["email"]?.jsonPrimitive?.content)
+        assertEquals("password123", jsonObject["password"]?.jsonPrimitive?.content)
         assertEquals("android_device_unique_id", jsonObject["device_id"]?.jsonPrimitive?.content)
         assertEquals("America/New_York", jsonObject["timezone"]?.jsonPrimitive?.content)
         assertFalse("Should use snake_case, not camelCase", jsonObject.containsKey("deviceId"))
     }
 
-    // --- Test 2: PairingResponse deserialization with device_token and user_id ---
+    // --- Test 2: SearchLoginResponse deserialization with device_token and user_id ---
 
     @Test
-    fun `PairingResponse deserializes device_token and user_id from snake_case JSON`() {
+    fun `SearchLoginResponse deserializes device_token and user_id from snake_case JSON`() {
         val responseJson = """
             {
               "device_token": "long_lived_token_string",
@@ -43,16 +45,16 @@ class PairingDeviceOverrideModelsTest {
             }
         """.trimIndent()
 
-        val response = json.decodeFromString<PairingResponse>(responseJson)
+        val response = json.decodeFromString<SearchLoginResponse>(responseJson)
 
         assertEquals("long_lived_token_string", response.deviceToken)
         assertEquals("some-uuid-value", response.userId)
     }
 
-    // --- Test 3: PairingResponse parses JSON from API contract ---
+    // --- Test 3: SearchLoginResponse parses JSON from API contract ---
 
     @Test
-    fun `PairingResponse correctly parses API contract JSON example`() {
+    fun `SearchLoginResponse correctly parses API contract JSON example`() {
         val apiContractJson = """
             {
               "device_token": "long_lived_token_string",
@@ -60,13 +62,13 @@ class PairingDeviceOverrideModelsTest {
             }
         """.trimIndent()
 
-        val response = json.decodeFromString<PairingResponse>(apiContractJson)
+        val response = json.decodeFromString<SearchLoginResponse>(apiContractJson)
 
         assertEquals("long_lived_token_string", response.deviceToken)
         assertEquals("uuid", response.userId)
 
         val reserialized = json.encodeToString(response)
-        val reParsed = json.decodeFromString<PairingResponse>(reserialized)
+        val reParsed = json.decodeFromString<SearchLoginResponse>(reserialized)
         assertEquals(response, reParsed)
     }
 

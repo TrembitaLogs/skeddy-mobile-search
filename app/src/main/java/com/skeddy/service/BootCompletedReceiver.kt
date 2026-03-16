@@ -96,7 +96,7 @@ class BootCompletedReceiver : BroadcastReceiver() {
             return
         }
 
-        // Check app state - only start service in PAIRED or FORCE_UPDATE states
+        // Check app state - only start service in LOGGED_IN or FORCE_UPDATE states
         val deviceTokenManager = DeviceTokenManager(context)
         val preferences = SkeddyPreferences(context)
         val appStateDeterminer = AppStateDeterminer(deviceTokenManager, preferences)
@@ -106,13 +106,13 @@ class BootCompletedReceiver : BroadcastReceiver() {
         val currentState = appStateDeterminer.determine(isAccessibilityEnabled)
 
         when (currentState) {
-            is AppState.Paired, is AppState.ForceUpdate -> {
+            is AppState.LoggedIn, is AppState.ForceUpdate -> {
                 Log.i(TAG, "handleBootCompleted: App state=$currentState, proceeding with service start")
                 SkeddyLogger.i(TAG, "Boot: app state=$currentState, starting service")
             }
-            is AppState.NotPaired -> {
-                Log.i(TAG, "handleBootCompleted: Skipping service start - device not paired")
-                SkeddyLogger.i(TAG, "Boot: skipping service start - device not paired")
+            is AppState.NotLoggedIn -> {
+                Log.i(TAG, "handleBootCompleted: Skipping service start - device not logged in")
+                SkeddyLogger.i(TAG, "Boot: skipping service start - device not logged in")
                 return
             }
             is AppState.NotConfigured -> {

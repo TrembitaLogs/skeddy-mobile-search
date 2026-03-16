@@ -22,41 +22,41 @@ class AppStateDeterminerTest {
         determiner = AppStateDeterminer(deviceTokenManager, preferences)
     }
 
-    // ==================== NOT_PAIRED State ====================
+    // ==================== NOT_LOGGED_IN State ====================
 
     @Test
-    fun `returns NotPaired when device is not paired`() {
-        every { deviceTokenManager.isPaired() } returns false
+    fun `returns NotLoggedIn when device is not logged in`() {
+        every { deviceTokenManager.isLoggedIn() } returns false
 
         val result = determiner.determine(isAccessibilityEnabled = true)
 
-        assertEquals(AppState.NotPaired, result)
+        assertEquals(AppState.NotLoggedIn, result)
     }
 
     @Test
-    fun `returns NotPaired regardless of accessibility when not paired`() {
-        every { deviceTokenManager.isPaired() } returns false
+    fun `returns NotLoggedIn regardless of accessibility when not logged in`() {
+        every { deviceTokenManager.isLoggedIn() } returns false
 
         val result = determiner.determine(isAccessibilityEnabled = false)
 
-        assertEquals(AppState.NotPaired, result)
+        assertEquals(AppState.NotLoggedIn, result)
     }
 
     @Test
-    fun `returns NotPaired regardless of force update when not paired`() {
-        every { deviceTokenManager.isPaired() } returns false
+    fun `returns NotLoggedIn regardless of force update when not logged in`() {
+        every { deviceTokenManager.isLoggedIn() } returns false
         every { preferences.forceUpdateActive } returns true
 
         val result = determiner.determine(isAccessibilityEnabled = true)
 
-        assertEquals(AppState.NotPaired, result)
+        assertEquals(AppState.NotLoggedIn, result)
     }
 
     // ==================== NOT_CONFIGURED State ====================
 
     @Test
-    fun `returns NotConfigured when paired but accessibility disabled`() {
-        every { deviceTokenManager.isPaired() } returns true
+    fun `returns NotConfigured when logged in but accessibility disabled`() {
+        every { deviceTokenManager.isLoggedIn() } returns true
 
         val result = determiner.determine(isAccessibilityEnabled = false)
 
@@ -65,7 +65,7 @@ class AppStateDeterminerTest {
 
     @Test
     fun `returns NotConfigured over ForceUpdate when accessibility disabled`() {
-        every { deviceTokenManager.isPaired() } returns true
+        every { deviceTokenManager.isLoggedIn() } returns true
         every { preferences.forceUpdateActive } returns true
 
         val result = determiner.determine(isAccessibilityEnabled = false)
@@ -76,8 +76,8 @@ class AppStateDeterminerTest {
     // ==================== FORCE_UPDATE State ====================
 
     @Test
-    fun `returns ForceUpdate when paired, accessible, and force update active`() {
-        every { deviceTokenManager.isPaired() } returns true
+    fun `returns ForceUpdate when logged in, accessible, and force update active`() {
+        every { deviceTokenManager.isLoggedIn() } returns true
         every { preferences.forceUpdateActive } returns true
         every { preferences.forceUpdateUrl } returns "https://play.google.com/store/apps/details?id=com.skeddy"
 
@@ -92,7 +92,7 @@ class AppStateDeterminerTest {
 
     @Test
     fun `returns ForceUpdate with null url when url not set`() {
-        every { deviceTokenManager.isPaired() } returns true
+        every { deviceTokenManager.isLoggedIn() } returns true
         every { preferences.forceUpdateActive } returns true
         every { preferences.forceUpdateUrl } returns null
 
@@ -102,34 +102,34 @@ class AppStateDeterminerTest {
         assertEquals(null, (result as AppState.ForceUpdate).updateUrl)
     }
 
-    // ==================== PAIRED State ====================
+    // ==================== LOGGED_IN State ====================
 
     @Test
-    fun `returns Paired when device is paired, accessible, and no force update`() {
-        every { deviceTokenManager.isPaired() } returns true
+    fun `returns LoggedIn when device is logged in, accessible, and no force update`() {
+        every { deviceTokenManager.isLoggedIn() } returns true
         every { preferences.forceUpdateActive } returns false
 
         val result = determiner.determine(isAccessibilityEnabled = true)
 
-        assertEquals(AppState.Paired, result)
+        assertEquals(AppState.LoggedIn, result)
     }
 
     // ==================== Priority Order ====================
 
     @Test
-    fun `NotPaired has highest priority over all other conditions`() {
-        every { deviceTokenManager.isPaired() } returns false
+    fun `NotLoggedIn has highest priority over all other conditions`() {
+        every { deviceTokenManager.isLoggedIn() } returns false
         every { preferences.forceUpdateActive } returns true
         every { preferences.forceUpdateUrl } returns "https://example.com"
 
         val result = determiner.determine(isAccessibilityEnabled = false)
 
-        assertEquals(AppState.NotPaired, result)
+        assertEquals(AppState.NotLoggedIn, result)
     }
 
     @Test
     fun `NotConfigured has higher priority than ForceUpdate`() {
-        every { deviceTokenManager.isPaired() } returns true
+        every { deviceTokenManager.isLoggedIn() } returns true
         every { preferences.forceUpdateActive } returns true
         every { preferences.forceUpdateUrl } returns "https://example.com"
 
@@ -139,8 +139,8 @@ class AppStateDeterminerTest {
     }
 
     @Test
-    fun `ForceUpdate has higher priority than Paired`() {
-        every { deviceTokenManager.isPaired() } returns true
+    fun `ForceUpdate has higher priority than LoggedIn`() {
+        every { deviceTokenManager.isLoggedIn() } returns true
         every { preferences.forceUpdateActive } returns true
         every { preferences.forceUpdateUrl } returns "https://example.com"
 

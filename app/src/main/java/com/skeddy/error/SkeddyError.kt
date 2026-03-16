@@ -205,24 +205,15 @@ sealed class SkeddyError(
         userMessageResId = R.string.error_message_server_internal
     )
 
-    // ==================== Pairing Errors (E026-E027) ====================
+    // ==================== Login Errors (E026) ====================
 
     /**
-     * Pairing code is invalid or expired (API returns 404 for both cases).
+     * Login failed — invalid email or password (API returns 401).
      */
-    data object PairingCodeInvalidOrExpired : SkeddyError(
+    data object LoginInvalidCredentials : SkeddyError(
         code = "E026",
-        message = "Pairing code invalid or expired",
-        userMessageResId = R.string.error_message_pairing_invalid
-    )
-
-    /**
-     * Pairing code has already been used (API returns 409).
-     */
-    data object PairingAlreadyUsed : SkeddyError(
-        code = "E027",
-        message = "Pairing code already used",
-        userMessageResId = R.string.error_message_pairing_used
+        message = "Invalid email or password",
+        userMessageResId = R.string.login_error_invalid_credentials
     )
 
     // ==================== Dynamic Errors ====================
@@ -296,8 +287,7 @@ sealed class SkeddyError(
                 ServerValidationError,
                 ServerServiceUnavailable,
                 ServerInternalError,
-                PairingCodeInvalidOrExpired,
-                PairingAlreadyUsed
+                LoginInvalidCredentials
             )
         }
 

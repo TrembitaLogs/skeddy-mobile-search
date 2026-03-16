@@ -5,22 +5,22 @@ package com.skeddy.ui
  * determining which screen to display.
  *
  * Priority order for state determination (first match wins):
- * 1. [NotPaired] - no device token stored
- * 2. [NotConfigured] - paired but Accessibility Service disabled
+ * 1. [NotLoggedIn] - no device token stored
+ * 2. [NotConfigured] - logged in but Accessibility Service disabled
  * 3. [ForceUpdate] - server flagged a required app update
- * 4. [Paired] - fully operational
+ * 4. [LoggedIn] - fully operational
  */
 sealed class AppState {
 
-    /** Device is not paired - show PairingActivity. */
-    data object NotPaired : AppState()
+    /** Device is not logged in - show LoginActivity. */
+    data object NotLoggedIn : AppState()
 
-    /** Paired, but Accessibility Service is disabled - show SetupRequiredActivity. */
+    /** Logged in, but Accessibility Service is disabled - show SetupRequiredActivity. */
     data object NotConfigured : AppState()
 
     /** Server requires app update - show ForceUpdateActivity. */
     data class ForceUpdate(val updateUrl: String?) : AppState()
 
-    /** Paired and fully configured - show main screen. */
-    data object Paired : AppState()
+    /** Logged in and fully configured - show main screen. */
+    data object LoggedIn : AppState()
 }

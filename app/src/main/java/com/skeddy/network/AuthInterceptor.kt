@@ -5,10 +5,10 @@ import okhttp3.Response
 
 /**
  * OkHttp Interceptor that adds X-Device-Token and X-Device-ID headers
- * to every request, except POST /pairing/confirm which is a public endpoint
- * (device token does not exist at pairing time).
+ * to every request, except POST /auth/search-login which is a public endpoint
+ * (device token does not exist at login time).
  *
- * If the device token is null (not paired), the request proceeds with an
+ * If the device token is null (not logged in), the request proceeds with an
  * empty X-Device-Token header — the server will respond with 401.
  */
 class AuthInterceptor(
@@ -18,11 +18,11 @@ class AuthInterceptor(
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
 
-        // Skip auth headers for POST /pairing/confirm — token doesn't exist yet
-        val isPairingConfirm = request.url.encodedPath.endsWith("/pairing/confirm")
+        // Skip auth headers for POST /auth/search-login — token doesn't exist yet
+        val isSearchLogin = request.url.encodedPath.endsWith("/auth/search-login")
                 && request.method == "POST"
 
-        if (isPairingConfirm) {
+        if (isSearchLogin) {
             return chain.proceed(request)
         }
 

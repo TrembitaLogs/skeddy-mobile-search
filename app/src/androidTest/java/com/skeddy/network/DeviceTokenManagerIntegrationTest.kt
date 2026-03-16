@@ -44,7 +44,7 @@ class DeviceTokenManagerIntegrationTest {
         val newManager = DeviceTokenManager(context)
 
         assertEquals(token, newManager.getDeviceToken())
-        assertTrue(newManager.isPaired())
+        assertTrue(newManager.isLoggedIn())
     }
 
     @Test
@@ -83,7 +83,7 @@ class DeviceTokenManagerIntegrationTest {
         // Create a new instance — verify clear persisted
         val newManager = DeviceTokenManager(context)
 
-        assertFalse(newManager.isPaired())
+        assertFalse(newManager.isLoggedIn())
         assertNull(newManager.getDeviceToken())
     }
 

@@ -1131,11 +1131,11 @@ class MonitoringForegroundServiceTest {
 
         // Save a token first so we can verify it gets cleared
         service.deviceTokenManager.saveDeviceToken("test-token")
-        assertTrue("Should be paired before unauthorized", service.deviceTokenManager.isPaired())
+        assertTrue("Should be logged in before unauthorized", service.deviceTokenManager.isLoggedIn())
 
         service.handleUnauthorized()
 
-        assertFalse("Device token should be cleared after unauthorized", service.deviceTokenManager.isPaired())
+        assertFalse("Device token should be cleared after unauthorized", service.deviceTokenManager.isLoggedIn())
     }
 
     @Test
@@ -1910,18 +1910,18 @@ class MonitoringForegroundServiceTest {
     }
 
     @Test
-    fun `performInitialPing when not paired skips ping and schedules next`() {
+    fun `performInitialPing when not logged in skips ping and schedules next`() {
         // Set mock BEFORE startMonitoring to intercept the initial monitoring cycle
         val mockServerClient = mockk<SkeddyServerClient>()
         coEvery { mockServerClient.ping(any()) } returns ApiResult.Success(makePingResponse(search = false))
         service.serverClient = mockServerClient
 
         service.startMonitoring()
-        // Do NOT save device token — device is not paired
+        // Do NOT save device token — device is not logged in
 
         service.performInitialPing()
         // Do NOT idle the looper — performInitialPing returns synchronously
-        // when not paired, and we don't want the monitoring cycle to run
+        // when not logged in, and we don't want the monitoring cycle to run
 
         // Monitoring should still be active (method doesn't stop it)
         assertTrue("Monitoring should still be active", service.isMonitoringActive())
@@ -2006,13 +2006,13 @@ class MonitoringForegroundServiceTest {
     // ==================== Task 2.2: startMonitoring + performInitialPing Integration Tests ====================
 
     @Test
-    fun `startMonitoring calls performInitialPing which pings server when paired`() {
+    fun `startMonitoring calls performInitialPing which pings server when logged in`() {
         val mockServerClient = mockk<SkeddyServerClient>()
         coEvery { mockServerClient.ping(any()) } returns ApiResult.Success(makePingResponse(search = false))
         service.serverClient = mockServerClient
 
         val mockTokenManager = mockk<DeviceTokenManager>()
-        io.mockk.every { mockTokenManager.isPaired() } returns true
+        io.mockk.every { mockTokenManager.isLoggedIn() } returns true
         service.deviceTokenManager = mockTokenManager
 
         service.startMonitoring()
@@ -2022,12 +2022,12 @@ class MonitoringForegroundServiceTest {
     }
 
     @Test
-    fun `startMonitoring calls performInitialPing which skips ping when not paired`() {
+    fun `startMonitoring calls performInitialPing which skips ping when not logged in`() {
         val mockServerClient = mockk<SkeddyServerClient>()
         service.serverClient = mockServerClient
 
         val mockTokenManager = mockk<DeviceTokenManager>()
-        io.mockk.every { mockTokenManager.isPaired() } returns false
+        io.mockk.every { mockTokenManager.isLoggedIn() } returns false
         service.deviceTokenManager = mockTokenManager
 
         service.startMonitoring()
@@ -2042,7 +2042,7 @@ class MonitoringForegroundServiceTest {
 
         service.startMonitoring()
 
-        // Flag is reset at start, then set to true by performInitialPing (not paired path)
+        // Flag is reset at start, then set to true by performInitialPing (not logged in path)
         assertTrue("isInitialPingCompleted should be true after initial ping completes",
             service.isInitialPingCompleted)
     }
@@ -2054,7 +2054,7 @@ class MonitoringForegroundServiceTest {
         service.serverClient = mockServerClient
 
         val mockTokenManager = mockk<DeviceTokenManager>()
-        io.mockk.every { mockTokenManager.isPaired() } returns true
+        io.mockk.every { mockTokenManager.isLoggedIn() } returns true
         service.deviceTokenManager = mockTokenManager
 
         service.startMonitoring()
@@ -2075,13 +2075,13 @@ class MonitoringForegroundServiceTest {
     }
 
     @Test
-    fun `startMonitoring with paired device and search true starts searching`() {
+    fun `startMonitoring with logged in device and search true starts searching`() {
         val mockServerClient = mockk<SkeddyServerClient>()
         coEvery { mockServerClient.ping(any()) } returns ApiResult.Success(makePingResponse(search = true))
         service.serverClient = mockServerClient
 
         val mockTokenManager = mockk<DeviceTokenManager>()
-        io.mockk.every { mockTokenManager.isPaired() } returns true
+        io.mockk.every { mockTokenManager.isLoggedIn() } returns true
         service.deviceTokenManager = mockTokenManager
 
         service.startMonitoring()
@@ -2106,7 +2106,7 @@ class MonitoringForegroundServiceTest {
         service.serverClient = mockServerClient
 
         val mockTokenManager = mockk<DeviceTokenManager>()
-        io.mockk.every { mockTokenManager.isPaired() } returns true
+        io.mockk.every { mockTokenManager.isLoggedIn() } returns true
         service.deviceTokenManager = mockTokenManager
 
         service.startMonitoring()
@@ -2235,7 +2235,7 @@ class MonitoringForegroundServiceTest {
         service.serverClient = mockServerClient
 
         val mockTokenManager = mockk<DeviceTokenManager>()
-        io.mockk.every { mockTokenManager.isPaired() } returns true
+        io.mockk.every { mockTokenManager.isLoggedIn() } returns true
         service.deviceTokenManager = mockTokenManager
 
         service.startMonitoring()
@@ -2268,7 +2268,7 @@ class MonitoringForegroundServiceTest {
         service.serverClient = mockServerClient
 
         val mockTokenManager = mockk<DeviceTokenManager>()
-        io.mockk.every { mockTokenManager.isPaired() } returns true
+        io.mockk.every { mockTokenManager.isLoggedIn() } returns true
         service.deviceTokenManager = mockTokenManager
 
         service.startMonitoring()

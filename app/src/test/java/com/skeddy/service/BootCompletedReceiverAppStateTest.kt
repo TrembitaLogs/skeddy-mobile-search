@@ -23,8 +23,8 @@ import org.robolectric.annotation.Config
  * MonitoringForegroundService after boot.
  *
  * Test cases (from task 24.4 test strategy):
- * 1. PAIRED -> verify startMonitoringService()
- * 2. NOT_PAIRED -> verify service NOT started
+ * 1. LOGGED_IN -> verify startMonitoringService()
+ * 2. NOT_LOGGED_IN -> verify service NOT started
  * 3. NOT_CONFIGURED -> verify service NOT started
  * 4. FORCE_UPDATE -> verify startMonitoringService()
  */
@@ -63,10 +63,10 @@ class BootCompletedReceiverAppStateTest {
         ServiceRestartJobService.clearMonitoringFlag(context)
     }
 
-    // ==================== PAIRED State ====================
+    // ==================== LOGGED_IN State ====================
 
     @Test
-    fun `PAIRED state starts MonitoringForegroundService`() {
+    fun `LOGGED_IN state starts MonitoringForegroundService`() {
         setUpForServiceStart()
         deviceTokenManager.saveDeviceToken("test-token")
         enableAccessibility()
@@ -74,20 +74,20 @@ class BootCompletedReceiverAppStateTest {
         sendBootCompleted()
 
         val startedService = shadowOf(RuntimeEnvironment.getApplication()).nextStartedService
-        assertNotNull("Service should be started in PAIRED state", startedService)
+        assertNotNull("Service should be started in LOGGED_IN state", startedService)
     }
 
-    // ==================== NOT_PAIRED State ====================
+    // ==================== NOT_LOGGED_IN State ====================
 
     @Test
-    fun `NOT_PAIRED state does not start service`() {
+    fun `NOT_LOGGED_IN state does not start service`() {
         setUpForServiceStart()
-        // No device token -> NOT_PAIRED
+        // No device token -> NOT_LOGGED_IN
 
         sendBootCompleted()
 
         val startedService = shadowOf(RuntimeEnvironment.getApplication()).nextStartedService
-        assertNull("Service should NOT be started in NOT_PAIRED state", startedService)
+        assertNull("Service should NOT be started in NOT_LOGGED_IN state", startedService)
     }
 
     // ==================== NOT_CONFIGURED State ====================
@@ -123,8 +123,8 @@ class BootCompletedReceiverAppStateTest {
     // ==================== Guard Checks Still Work ====================
 
     @Test
-    fun `does not start service when auto-start is disabled even if PAIRED`() {
-        // auto-start disabled, but monitoring was active and device is paired
+    fun `does not start service when auto-start is disabled even if LOGGED_IN`() {
+        // auto-start disabled, but monitoring was active and device is logged in
         BootCompletedReceiver.setAutoStartEnabled(context, false)
         ServiceRestartJobService.markMonitoringActive(context, true)
         deviceTokenManager.saveDeviceToken("test-token")
@@ -137,7 +137,7 @@ class BootCompletedReceiverAppStateTest {
     }
 
     @Test
-    fun `does not start service when monitoring was not active even if PAIRED`() {
+    fun `does not start service when monitoring was not active even if LOGGED_IN`() {
         // auto-start enabled, but monitoring was NOT active
         BootCompletedReceiver.setAutoStartEnabled(context, true)
         ServiceRestartJobService.markMonitoringActive(context, false)

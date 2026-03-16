@@ -91,24 +91,24 @@ class DeviceTokenManagerTest {
         assertNull(manager.getDeviceToken())
     }
 
-    // ==================== isPaired Tests ====================
+    // ==================== isLoggedIn Tests ====================
 
     @Test
-    fun `isPaired returns false for new instance`() {
-        assertFalse(manager.isPaired())
+    fun `isLoggedIn returns false for new instance`() {
+        assertFalse(manager.isLoggedIn())
     }
 
     @Test
-    fun `isPaired returns true after saveDeviceToken`() {
+    fun `isLoggedIn returns true after saveDeviceToken`() {
         manager.saveDeviceToken("some-token")
-        assertTrue(manager.isPaired())
+        assertTrue(manager.isLoggedIn())
     }
 
     @Test
-    fun `isPaired returns false after clearDeviceToken`() {
+    fun `isLoggedIn returns false after clearDeviceToken`() {
         manager.saveDeviceToken("some-token")
         manager.clearDeviceToken()
-        assertFalse(manager.isPaired())
+        assertFalse(manager.isLoggedIn())
     }
 
     // ==================== getDeviceId Tests ====================

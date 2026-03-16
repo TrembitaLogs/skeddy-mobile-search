@@ -71,8 +71,8 @@ class MainViewModel(
     private val _toastMessage = MutableLiveData<Int?>()
     val toastMessage: LiveData<Int?> = _toastMessage
 
-    private val _navigateToPairing = MutableLiveData(false)
-    val navigateToPairing: LiveData<Boolean> = _navigateToPairing
+    private val _navigateToLogin = MutableLiveData(false)
+    val navigateToLogin: LiveData<Boolean> = _navigateToLogin
 
     private val _serviceControlEvent = MutableLiveData<Boolean?>()
     val serviceControlEvent: LiveData<Boolean?> = _serviceControlEvent
@@ -103,7 +103,7 @@ class MainViewModel(
                 is ApiResult.Unauthorized -> {
                     // SkeddyServerClient already calls clearDeviceToken() on 401/403
                     deviceTokenManager.clearDeviceToken()
-                    _navigateToPairing.value = true
+                    _navigateToLogin.value = true
                 }
                 is ApiResult.NetworkError -> {
                     _toastMessage.value = R.string.network_error
@@ -112,7 +112,7 @@ class MainViewModel(
                 is ApiResult.ServiceUnavailable,
                 is ApiResult.ValidationError,
                 is ApiResult.RateLimited,
-                is ApiResult.PairingError -> {
+                is ApiResult.LoginError -> {
                     _toastMessage.value = R.string.server_error
                 }
             }
@@ -125,8 +125,8 @@ class MainViewModel(
         _toastMessage.value = null
     }
 
-    fun clearNavigateToPairing() {
-        _navigateToPairing.value = false
+    fun clearNavigateToLogin() {
+        _navigateToLogin.value = false
     }
 
     fun clearServiceControlEvent() {

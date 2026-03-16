@@ -75,17 +75,17 @@
     <string name="battery_optimization_dialog_title">Desactivar Optimización de Batería</string>
     <string name="battery_optimization_dialog_message">Para un monitoreo confiable en segundo plano, Skeddy necesita estar exento de la optimización de batería.\n\nEsto asegura que la aplicación continúe buscando viajes de alto valor incluso cuando su teléfono esté inactivo.</string>
 
-    <!-- Pairing Screen -->
-    <string name="pairing_title">Emparejar con Skeddy Main</string>
-    <string name="pairing_instructions">Ingrese el codigo de emparejamiento desde su aplicacion principal</string>
-    <string name="pairing_hint">Ingrese el codigo de 6 digitos</string>
-    <string name="pairing_button">Emparejar</string>
-    <string name="pairing_error_invalid">Codigo invalido o expirado</string>
-    <string name="pairing_error_already_used">Este codigo ya ha sido utilizado</string>
-    <string name="pairing_error_network">Error de red. Verifique su conexion e intente nuevamente.</string>
-    <string name="pairing_error_unknown">Algo salio mal. Por favor intente nuevamente.</string>
-    <string name="pairing_success">Emparejado exitosamente!</string>
-    <string name="cd_pairing_logo">Logo de Skeddy Search</string>
+    <!-- Login Screen -->
+    <string name="login_title">Iniciar sesión en Skeddy</string>
+    <string name="login_instructions">Use las credenciales de su cuenta Skeddy</string>
+    <string name="login_email_hint">Correo electrónico</string>
+    <string name="login_password_hint">Contraseña</string>
+    <string name="login_button">Iniciar Sesión</string>
+    <string name="login_error_invalid_credentials">Correo o contraseña inválidos</string>
+    <string name="login_error_network">Error de red. Verifique su conexión e intente nuevamente.</string>
+    <string name="login_error_unknown">Algo salió mal. Por favor intente nuevamente.</string>
+    <string name="login_success">Inicio de sesión exitoso!</string>
+    <string name="cd_login_logo">Logo de Skeddy Search</string>
 
     <!-- Setup Required Screen -->
     <string name="setup_required_title">Se Requiere Servicio de Accesibilidad</string>
@@ -115,15 +115,14 @@
 
     <!-- Server Error Messages -->
     <string name="error_message_server_unreachable">No se puede conectar al servidor. Verifique su conexión a internet.</string>
-    <string name="error_message_server_unauthorized">Sesión expirada. Empareje su dispositivo nuevamente.</string>
+    <string name="error_message_server_unauthorized">Sesión expirada. Inicie sesión nuevamente.</string>
     <string name="error_message_server_rate_limited">Demasiadas solicitudes. Intente más tarde.</string>
     <string name="error_message_server_validation">Datos inválidos enviados al servidor.</string>
     <string name="error_message_server_unavailable">Servidor temporalmente no disponible. Intente más tarde.</string>
     <string name="error_message_server_internal">Error del servidor. Intente más tarde.</string>
 
-    <!-- Pairing Error Messages -->
-    <string name="error_message_pairing_invalid">Código de emparejamiento inválido o expirado.</string>
-    <string name="error_message_pairing_used">Este código de emparejamiento ya ha sido utilizado.</string>
+    <!-- Login Error Messages -->
+    <string name="error_message_login_invalid_credentials">Correo o contraseña inválidos.</string>
 
     <!-- Monitor Tab - Service Status -->
     <string name="service_accessibility_enabled">Servicio de Accesibilidad activado</string>

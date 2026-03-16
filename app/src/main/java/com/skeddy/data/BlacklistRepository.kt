@@ -8,7 +8,7 @@ import kotlinx.coroutines.withContext
  * Repository wrapping [BlacklistDao] with business logic for ride cleanup.
  *
  * Provides a single access point for blacklist operations used by
- * MonitoringForegroundService, AutoAcceptManager, PairingActivity, and RideFilter.
+ * MonitoringForegroundService, AutoAcceptManager, LoginActivity, and RideFilter.
  */
 class BlacklistRepository(private val blacklistDao: BlacklistDao) {
 
