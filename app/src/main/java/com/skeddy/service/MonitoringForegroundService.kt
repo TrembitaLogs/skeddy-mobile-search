@@ -1328,7 +1328,7 @@ class MonitoringForegroundService : Service() {
      * and schedules the next monitoring cycle with the default interval.
      */
     internal fun performInitialPing() {
-        if (!deviceTokenManager.isPaired()) {
+        if (!deviceTokenManager.isLoggedIn()) {
             Log.w(TAG, "performInitialPing: No device token, skipping initial ping")
             isInitialPingCompleted = true
             scheduleNextPing(currentInterval * 1000L)
@@ -1353,7 +1353,7 @@ class MonitoringForegroundService : Service() {
                     is ApiResult.RateLimited -> handleRateLimited(pingResult.retryAfterSeconds)
                     is ApiResult.ServiceUnavailable -> handleServiceUnavailable()
                     is ApiResult.ServerError -> handleServerError()
-                    is ApiResult.PairingError -> handleServerError()
+                    is ApiResult.LoginError -> handleServerError()
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "performInitialPing: Unexpected error", e)
@@ -1440,7 +1440,7 @@ class MonitoringForegroundService : Service() {
                 is ApiResult.RateLimited -> handleRateLimited(pingResult.retryAfterSeconds)
                 is ApiResult.ServiceUnavailable -> handleServiceUnavailable()
                 is ApiResult.ServerError -> handleServerError()
-                is ApiResult.PairingError -> handleServerError() // Should not happen for ping; safety fallback
+                is ApiResult.LoginError -> handleServerError() // Should not happen for ping; safety fallback
             }
         } catch (e: Exception) {
             Log.e(TAG, "monitoringCycleWithPing: Unexpected error during ping cycle", e)
@@ -1574,8 +1574,8 @@ class MonitoringForegroundService : Service() {
      *
      * Clears device token, blacklist, and pending ride queue, then stops
      * the service and broadcasts [ACTION_UNPAIRED] so the UI layer
-     * transitions to the pairing screen.
-     * No retry — user must re-pair.
+     * transitions to the login screen.
+     * No retry — user must re-login.
      *
      * Note: [SkeddyServerClient] already calls [DeviceTokenManager.clearDeviceToken]
      * before returning [ApiResult.Unauthorized], so the call here is idempotent.
@@ -1585,7 +1585,7 @@ class MonitoringForegroundService : Service() {
         SkeddyLogger.w(TAG, "Unauthorized — clearing device token, stopping service")
         deviceTokenManager.clearDeviceToken()
 
-        // Clear ride data from the old pairing context (DEF-23)
+        // Clear ride data from the old login context (DEF-23)
         try {
             blacklistRepository.clearAll()
             Log.d(TAG, "handleUnauthorized: blacklist cleared")
@@ -1646,13 +1646,16 @@ class MonitoringForegroundService : Service() {
     /**
      * Handles 503 Service Unavailable response (e.g. Redis down).
      *
-     * Stops searching and schedules retry after 60 seconds.
+     * Sets server offline flag, stops searching, and schedules retry after 60 seconds.
+     * Uses [scheduleRetryPing] (same as [handleServerError]) so that the retry
+     * mechanism properly handles consecutive failures and auto-resume.
      */
     internal fun handleServiceUnavailable() {
         Log.w(TAG, "handleServiceUnavailable: Server unavailable, retrying in 60s")
         SkeddyLogger.w(TAG, "Service unavailable during ping — retry in 60s")
+        isServerOffline = true
         stopSearching()
-        scheduleNextPing(60_000L)
+        scheduleRetryPing(60_000L)
     }
 
     /**
@@ -1690,7 +1693,7 @@ class MonitoringForegroundService : Service() {
 
     /**
      * Broadcasts [ACTION_UNPAIRED] to notify the UI layer that the device token
-     * has been invalidated (401/403). The UI should transition to the pairing screen.
+     * has been invalidated (401/403). The UI should transition to the login screen.
      */
     private fun notifyUnpaired() {
         val intent = Intent(ACTION_UNPAIRED).apply {

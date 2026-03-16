@@ -2,12 +2,12 @@ package com.skeddy.network
 
 import com.skeddy.network.models.DeviceOverrideRequest
 import com.skeddy.network.models.OkResponse
-import com.skeddy.network.models.PairingRequest
-import com.skeddy.network.models.PairingResponse
 import com.skeddy.network.models.PingRequest
 import com.skeddy.network.models.PingResponse
 import com.skeddy.network.models.RideReportRequest
 import com.skeddy.network.models.RideReportResponse
+import com.skeddy.network.models.SearchLoginRequest
+import com.skeddy.network.models.SearchLoginResponse
 import com.skeddy.network.models.parseErrorBody
 import retrofit2.Response
 import java.io.IOException
@@ -17,11 +17,11 @@ import java.io.IOException
  * into [ApiResult] sealed class instances with centralized error handling.
  *
  * Generic endpoints (ping, reportRide, deviceOverride) use [handleResponse] which maps
- * HTTP status codes to appropriate error types. The confirmPairing endpoint uses
- * [handlePairingResponse] which additionally maps 404/409 to pairing-specific errors.
+ * HTTP status codes to appropriate error types. The searchLogin endpoint uses
+ * [handleLoginResponse] which additionally maps 401 to login-specific errors.
  *
  * On 401/403, the device token is cleared via [DeviceTokenManager.clearDeviceToken]
- * to trigger automatic transition to the pairing screen.
+ * to trigger automatic transition to the login screen.
  */
 class SkeddyServerClient(
     private val api: SkeddyApi,
@@ -38,15 +38,14 @@ class SkeddyServerClient(
         safeApiCall { api.deviceOverride(request) }
 
     /**
-     * Confirms pairing with a 6-digit code.
-     * Uses [handlePairingResponse] instead of the generic [handleResponse]
-     * to map 404 to [PairingErrorReason.INVALID_OR_EXPIRED] and
-     * 409 to [PairingErrorReason.ALREADY_USED].
+     * Authenticates the search device with email and password.
+     * Uses [handleLoginResponse] instead of the generic [handleResponse]
+     * to map 401 to [LoginErrorReason.INVALID_CREDENTIALS].
      */
-    suspend fun confirmPairing(request: PairingRequest): ApiResult<PairingResponse> {
+    suspend fun searchLogin(request: SearchLoginRequest): ApiResult<SearchLoginResponse> {
         return try {
-            val response = api.confirmPairing(request)
-            handlePairingResponse(response)
+            val response = api.searchLogin(request)
+            handleLoginResponse(response)
         } catch (e: IOException) {
             ApiResult.NetworkError
         }
@@ -104,23 +103,27 @@ class SkeddyServerClient(
     }
 
     /**
-     * Pairing-specific response handler that maps 404/409 to [ApiResult.PairingError]
+     * Login-specific response handler that maps 401 to [ApiResult.LoginError]
      * before falling back to the generic [handleResponse] for other codes.
      *
-     * - 404: [PairingErrorReason.INVALID_OR_EXPIRED] (code not found or expired)
-     * - 409: [PairingErrorReason.ALREADY_USED] (code already consumed)
+     * - 401: [LoginErrorReason.INVALID_CREDENTIALS] (wrong email or password)
+     * - 422: [ApiResult.ValidationError] (validation error)
      * - Other codes: delegated to [handleResponse]
      */
-    private fun handlePairingResponse(
-        response: Response<PairingResponse>
-    ): ApiResult<PairingResponse> {
+    private fun handleLoginResponse(
+        response: Response<SearchLoginResponse>
+    ): ApiResult<SearchLoginResponse> {
         if (response.isSuccessful) {
             return ApiResult.Success(response.body()!!)
         }
 
         return when (response.code()) {
-            404 -> ApiResult.PairingError(PairingErrorReason.INVALID_OR_EXPIRED)
-            409 -> ApiResult.PairingError(PairingErrorReason.ALREADY_USED)
+            401 -> ApiResult.LoginError(LoginErrorReason.INVALID_CREDENTIALS)
+            422 -> {
+                val errorBody = response.errorBody()?.string()
+                val parsed = parseErrorBody(errorBody)
+                ApiResult.ValidationError(parsed?.error?.message ?: "Validation error")
+            }
             else -> handleResponse(response)
         }
     }

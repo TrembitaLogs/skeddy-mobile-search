@@ -38,21 +38,21 @@ import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import java.util.concurrent.TimeUnit
 
 /**
- * Integration tests for the pairing flow.
+ * Integration tests for the login flow.
  *
- * Unlike [PairingActivityPairingFlowTest] (which mocks [SkeddyServerClient]),
+ * Unlike [LoginActivityLoginFlowTest] (which mocks [SkeddyServerClient]),
  * these tests use a REAL [SkeddyServerClient] connected to [MockWebServer].
  * This verifies the full chain:
- *   PairingActivity → SkeddyServerClient → Retrofit → OkHttp → MockWebServer
+ *   LoginActivity -> SkeddyServerClient -> Retrofit -> OkHttp -> MockWebServer
  *
  * Covers: request serialization, HTTP response parsing, error code mapping,
- * token persistence calls, re-pairing cleanup, and UI state transitions.
+ * token persistence calls, re-login cleanup, and UI state transitions.
  */
 @RunWith(RobolectricTestRunner::class)
-class PairingFlowIntegrationTest {
+class LoginFlowIntegrationTest {
 
     private lateinit var mockWebServer: MockWebServer
-    private lateinit var activity: PairingActivity
+    private lateinit var activity: LoginActivity
     private lateinit var mockDeviceTokenManager: DeviceTokenManager
     private lateinit var mockBlacklistRepository: BlacklistRepository
     private lateinit var mockPendingRideQueue: PendingRideQueue
@@ -82,7 +82,7 @@ class PairingFlowIntegrationTest {
         val api = retrofit.create(SkeddyApi::class.java)
         val realServerClient = SkeddyServerClient(api, mockDeviceTokenManager)
 
-        activity = Robolectric.buildActivity(PairingActivity::class.java)
+        activity = Robolectric.buildActivity(LoginActivity::class.java)
             .create().resume().get()
 
         // Override dependencies with real server client and mocked storage
@@ -102,109 +102,88 @@ class PairingFlowIntegrationTest {
         unmockkAll()
     }
 
-    // ==================== 1. testPairingSuccess ====================
+    // ==================== 1. testLoginSuccess ====================
 
     @Test
-    fun `pairing success saves token and navigates to MainActivity`() {
+    fun `login success saves token and navigates to MainActivity`() {
         mockWebServer.enqueue(
             MockResponse()
                 .setResponseCode(200)
                 .setBody("""{"device_token":"real-token-xyz","user_id":"user-789"}""")
         )
 
-        every { mockDeviceTokenManager.isPaired() } returns false
+        every { mockDeviceTokenManager.isLoggedIn() } returns false
         every { mockDeviceTokenManager.getDeviceId() } returns "test-device-id"
 
-        triggerPairingAndAwait("482917")
+        triggerLoginAndAwait("test@example.com", "password123")
 
         verify(exactly = 1) { mockDeviceTokenManager.saveDeviceToken("real-token-xyz") }
 
         val nextIntent = shadowOf(activity).nextStartedActivity
         assertNotNull("Should navigate to MainActivity", nextIntent)
         assertEquals(MainActivity::class.java.name, nextIntent.component?.className)
-        assertTrue("PairingActivity should finish", activity.isFinishing)
+        assertTrue("LoginActivity should finish", activity.isFinishing)
     }
 
-    // ==================== 2. testPairingInvalidCode ====================
+    // ==================== 2. testLoginInvalidCredentials ====================
 
     @Test
-    fun `server 404 shows invalid or expired code error`() {
+    fun `server 401 shows invalid credentials error`() {
         mockWebServer.enqueue(
             MockResponse()
-                .setResponseCode(404)
-                .setBody("""{"error":{"code":"PAIRING_CODE_EXPIRED","message":"Invalid or expired pairing code"}}""")
+                .setResponseCode(401)
+                .setBody("""{"error":{"code":"INVALID_CREDENTIALS","message":"Invalid email or password"}}""")
         )
 
-        every { mockDeviceTokenManager.isPaired() } returns false
+        every { mockDeviceTokenManager.isLoggedIn() } returns false
         every { mockDeviceTokenManager.getDeviceId() } returns "device-id"
 
-        triggerPairingAndAwait()
+        triggerLoginAndAwait()
 
         val errorText = activity.findViewById<TextView>(R.id.errorText)
         assertEquals(
-            activity.getString(R.string.pairing_error_invalid),
+            activity.getString(R.string.login_error_invalid_credentials),
             errorText.text.toString()
         )
         assertEquals(View.VISIBLE, errorText.visibility)
         verify(exactly = 0) { mockDeviceTokenManager.saveDeviceToken(any()) }
     }
 
-    // ==================== 3. testPairingNetworkError ====================
+    // ==================== 3. testLoginNetworkError ====================
 
     @Test
-    fun `network error shows error and re-enables pair button`() {
+    fun `network error shows error and re-enables login button`() {
         mockWebServer.shutdown()
 
-        every { mockDeviceTokenManager.isPaired() } returns false
+        every { mockDeviceTokenManager.isLoggedIn() } returns false
         every { mockDeviceTokenManager.getDeviceId() } returns "device-id"
 
-        triggerPairingAndAwait()
+        triggerLoginAndAwait()
 
         val errorText = activity.findViewById<TextView>(R.id.errorText)
         assertEquals(
-            activity.getString(R.string.pairing_error_network),
+            activity.getString(R.string.login_error_network),
             errorText.text.toString()
         )
         assertEquals(View.VISIBLE, errorText.visibility)
 
-        // Pair button re-enabled (serves as retry)
         assertTrue(
-            "Pair button should be re-enabled after error",
-            activity.findViewById<View>(R.id.pairButton).isEnabled
+            "Login button should be re-enabled after error",
+            activity.findViewById<View>(R.id.loginButton).isEnabled
         )
-        assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.pairButton).visibility)
+        assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.loginButton).visibility)
 
-        // Code input re-enabled
         assertTrue(
-            "Code input should be re-enabled after error",
-            activity.findViewById<View>(R.id.codeInput).isEnabled
+            "Email input should be re-enabled after error",
+            activity.findViewById<View>(R.id.emailInput).isEnabled
+        )
+        assertTrue(
+            "Password input should be re-enabled after error",
+            activity.findViewById<View>(R.id.passwordInput).isEnabled
         )
     }
 
-    // ==================== 4. testPairingAlreadyUsedCode ====================
-
-    @Test
-    fun `server 409 shows already used code error`() {
-        mockWebServer.enqueue(
-            MockResponse()
-                .setResponseCode(409)
-                .setBody("""{"error":{"code":"PAIRING_CODE_USED","message":"Code already used"}}""")
-        )
-
-        every { mockDeviceTokenManager.isPaired() } returns false
-        every { mockDeviceTokenManager.getDeviceId() } returns "device-id"
-
-        triggerPairingAndAwait()
-
-        val errorText = activity.findViewById<TextView>(R.id.errorText)
-        assertEquals(
-            activity.getString(R.string.pairing_error_already_used),
-            errorText.text.toString()
-        )
-        assertEquals(View.VISIBLE, errorText.visibility)
-    }
-
-    // ==================== 5. testTokenSavedToEncryptedPrefs ====================
+    // ==================== 4. testTokenSavedToEncryptedPrefs ====================
 
     @Test
     fun `saveDeviceToken called with exact token from HTTP response`() {
@@ -214,28 +193,28 @@ class PairingFlowIntegrationTest {
                 .setBody("""{"device_token":"encrypted-token-value-abc123","user_id":"user-456"}""")
         )
 
-        every { mockDeviceTokenManager.isPaired() } returns false
+        every { mockDeviceTokenManager.isLoggedIn() } returns false
         every { mockDeviceTokenManager.getDeviceId() } returns "device-id"
 
-        triggerPairingAndAwait()
+        triggerLoginAndAwait()
 
         verify(exactly = 1) { mockDeviceTokenManager.saveDeviceToken("encrypted-token-value-abc123") }
     }
 
-    // ==================== 6. testBlacklistClearedOnRepair ====================
+    // ==================== 5. testBlacklistClearedOnReLogin ====================
 
     @Test
-    fun `re-pairing clears blacklist and pending queue before saving new token`() {
+    fun `re-login clears blacklist and pending queue before saving new token`() {
         mockWebServer.enqueue(
             MockResponse()
                 .setResponseCode(200)
                 .setBody("""{"device_token":"new-token","user_id":"user-123"}""")
         )
 
-        every { mockDeviceTokenManager.isPaired() } returns true
+        every { mockDeviceTokenManager.isLoggedIn() } returns true
         every { mockDeviceTokenManager.getDeviceId() } returns "device-id"
 
-        triggerPairingAndAwait()
+        triggerLoginAndAwait()
 
         coVerify(exactly = 1) { mockBlacklistRepository.clearAll() }
         verify(exactly = 1) { mockPendingRideQueue.clear() }
@@ -243,45 +222,46 @@ class PairingFlowIntegrationTest {
     }
 
     @Test
-    fun `first pairing does NOT clear blacklist or pending queue`() {
+    fun `first login does NOT clear blacklist or pending queue`() {
         mockWebServer.enqueue(
             MockResponse()
                 .setResponseCode(200)
                 .setBody("""{"device_token":"first-token","user_id":"user-123"}""")
         )
 
-        every { mockDeviceTokenManager.isPaired() } returns false
+        every { mockDeviceTokenManager.isLoggedIn() } returns false
         every { mockDeviceTokenManager.getDeviceId() } returns "device-id"
 
-        triggerPairingAndAwait()
+        triggerLoginAndAwait()
 
         coVerify(exactly = 0) { mockBlacklistRepository.clearAll() }
         verify(exactly = 0) { mockPendingRideQueue.clear() }
         verify(exactly = 1) { mockDeviceTokenManager.saveDeviceToken("first-token") }
     }
 
-    // ==================== 7. testDeviceIdIncludedInRequest ====================
+    // ==================== 6. testRequestContainsCorrectFields ====================
 
     @Test
-    fun `HTTP request contains device_id, code, and timezone`() {
+    fun `HTTP request contains email, password, device_id, and timezone`() {
         mockWebServer.enqueue(
             MockResponse()
                 .setResponseCode(200)
                 .setBody("""{"device_token":"token","user_id":"user"}""")
         )
 
-        every { mockDeviceTokenManager.isPaired() } returns false
+        every { mockDeviceTokenManager.isLoggedIn() } returns false
         every { mockDeviceTokenManager.getDeviceId() } returns "my-android-device-id-abc"
 
-        triggerPairingAndAwait("482917")
+        triggerLoginAndAwait("user@test.com", "secret123")
 
         val request = mockWebServer.takeRequest(1, TimeUnit.SECONDS)
         assertNotNull("HTTP request should have been sent", request)
         assertEquals("POST", request!!.method)
-        assertEquals("/api/v1/pairing/confirm", request.path)
+        assertEquals("/api/v1/auth/search-login", request.path)
 
         val bodyJson = json.parseToJsonElement(request.body.readUtf8()).jsonObject
-        assertEquals("482917", bodyJson["code"]?.jsonPrimitive?.content)
+        assertEquals("user@test.com", bodyJson["email"]?.jsonPrimitive?.content)
+        assertEquals("secret123", bodyJson["password"]?.jsonPrimitive?.content)
         assertEquals("my-android-device-id-abc", bodyJson["device_id"]?.jsonPrimitive?.content)
         assertTrue(
             "timezone should be non-empty",
@@ -289,7 +269,7 @@ class PairingFlowIntegrationTest {
         )
     }
 
-    // ==================== 8. testLoadingStateShown ====================
+    // ==================== 7. testLoadingStateShown ====================
 
     @Test
     fun `loading state visible during HTTP request`() {
@@ -299,22 +279,22 @@ class PairingFlowIntegrationTest {
                 .setBody("""{"device_token":"token","user_id":"user"}""")
         )
 
-        every { mockDeviceTokenManager.isPaired() } returns false
+        every { mockDeviceTokenManager.isLoggedIn() } returns false
         every { mockDeviceTokenManager.getDeviceId() } returns "device-id"
 
-        activity.findViewById<EditText>(R.id.codeInput).setText("123456")
-        activity.onPairClicked()
+        activity.findViewById<EditText>(R.id.emailInput).setText("user@example.com")
+        activity.findViewById<EditText>(R.id.passwordInput).setText("pass")
+        activity.onLoginClicked()
 
-        // Loading state is set synchronously before the HTTP call suspends
-        assertEquals(View.INVISIBLE, activity.findViewById<View>(R.id.pairButton).visibility)
+        assertEquals(View.INVISIBLE, activity.findViewById<View>(R.id.loginButton).visibility)
         assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.progressBar).visibility)
-        assertFalse(activity.findViewById<View>(R.id.codeInput).isEnabled)
+        assertFalse(activity.findViewById<View>(R.id.emailInput).isEnabled)
+        assertFalse(activity.findViewById<View>(R.id.passwordInput).isEnabled)
 
-        // Let the HTTP call complete
-        awaitPairingCompletion()
+        awaitLoginCompletion()
     }
 
-    // ==================== 9. testNavigateToMainOnSuccess ====================
+    // ==================== 8. testNavigateToMainOnSuccess ====================
 
     @Test
     fun `navigation intent has correct flags on success`() {
@@ -324,56 +304,54 @@ class PairingFlowIntegrationTest {
                 .setBody("""{"device_token":"token","user_id":"user"}""")
         )
 
-        every { mockDeviceTokenManager.isPaired() } returns false
+        every { mockDeviceTokenManager.isLoggedIn() } returns false
         every { mockDeviceTokenManager.getDeviceId() } returns "device-id"
 
-        triggerPairingAndAwait()
+        triggerLoginAndAwait()
 
         val nextIntent = shadowOf(activity).nextStartedActivity
         assertNotNull("Should start MainActivity", nextIntent)
 
         val expectedFlags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         assertEquals(expectedFlags, nextIntent.flags and expectedFlags)
-        assertTrue("PairingActivity should be finishing", activity.isFinishing)
+        assertTrue("LoginActivity should be finishing", activity.isFinishing)
     }
 
-    // ==================== 10. testErrorMessageCleared ====================
+    // ==================== 9. testErrorMessageCleared ====================
 
     @Test
     fun `error message clears when user types after error`() {
         mockWebServer.enqueue(
             MockResponse()
-                .setResponseCode(404)
-                .setBody("""{"error":{"code":"PAIRING_CODE_EXPIRED","message":"Invalid"}}""")
+                .setResponseCode(401)
+                .setBody("""{"error":{"code":"INVALID_CREDENTIALS","message":"Invalid"}}""")
         )
 
-        every { mockDeviceTokenManager.isPaired() } returns false
+        every { mockDeviceTokenManager.isLoggedIn() } returns false
         every { mockDeviceTokenManager.getDeviceId() } returns "device-id"
 
-        triggerPairingAndAwait()
+        triggerLoginAndAwait()
 
-        // Error should be visible after failed pairing
         assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.errorText).visibility)
 
-        // Typing clears the error
-        activity.findViewById<EditText>(R.id.codeInput).setText("9")
+        activity.findViewById<EditText>(R.id.emailInput).setText("a")
         assertEquals(View.INVISIBLE, activity.findViewById<View>(R.id.errorText).visibility)
     }
 
-    // ==================== Additional: re-pairing error does NOT clean up ====================
+    // ==================== Additional: re-login error does NOT clean up ====================
 
     @Test
-    fun `re-pairing error does NOT clear blacklist or pending queue`() {
+    fun `re-login error does NOT clear blacklist or pending queue`() {
         mockWebServer.enqueue(
             MockResponse()
-                .setResponseCode(404)
-                .setBody("""{"error":{"code":"PAIRING_CODE_EXPIRED","message":"Invalid"}}""")
+                .setResponseCode(401)
+                .setBody("""{"error":{"code":"INVALID_CREDENTIALS","message":"Invalid"}}""")
         )
 
-        every { mockDeviceTokenManager.isPaired() } returns true
+        every { mockDeviceTokenManager.isLoggedIn() } returns true
         every { mockDeviceTokenManager.getDeviceId() } returns "device-id"
 
-        triggerPairingAndAwait()
+        triggerLoginAndAwait()
 
         coVerify(exactly = 0) { mockBlacklistRepository.clearAll() }
         verify(exactly = 0) { mockPendingRideQueue.clear() }
@@ -383,20 +361,18 @@ class PairingFlowIntegrationTest {
     // ==================== Additional: progress hidden after completion ====================
 
     @Test
-    fun `progress bar hidden and button restored after successful pairing`() {
+    fun `progress bar hidden and button restored after successful login`() {
         mockWebServer.enqueue(
             MockResponse()
                 .setResponseCode(200)
                 .setBody("""{"device_token":"token","user_id":"user"}""")
         )
 
-        every { mockDeviceTokenManager.isPaired() } returns false
+        every { mockDeviceTokenManager.isLoggedIn() } returns false
         every { mockDeviceTokenManager.getDeviceId() } returns "device-id"
 
-        triggerPairingAndAwait()
+        triggerLoginAndAwait()
 
-        // On success, activity finishes — but before that, navigation occurs
-        // Verify the activity is finishing (showSuccess calls finish())
         assertTrue(activity.isFinishing)
     }
 
@@ -404,48 +380,49 @@ class PairingFlowIntegrationTest {
     fun `progress bar hidden and button re-enabled after error`() {
         mockWebServer.enqueue(
             MockResponse()
-                .setResponseCode(409)
-                .setBody("""{"error":{"code":"PAIRING_CODE_USED","message":"Used"}}""")
+                .setResponseCode(401)
+                .setBody("""{"error":{"code":"INVALID_CREDENTIALS","message":"Invalid"}}""")
         )
 
-        every { mockDeviceTokenManager.isPaired() } returns false
+        every { mockDeviceTokenManager.isLoggedIn() } returns false
         every { mockDeviceTokenManager.getDeviceId() } returns "device-id"
 
-        triggerPairingAndAwait()
+        triggerLoginAndAwait()
 
         assertEquals(View.INVISIBLE, activity.findViewById<View>(R.id.progressBar).visibility)
-        assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.pairButton).visibility)
-        assertTrue(activity.findViewById<View>(R.id.pairButton).isEnabled)
-        assertTrue(activity.findViewById<View>(R.id.codeInput).isEnabled)
+        assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.loginButton).visibility)
+        assertTrue(activity.findViewById<View>(R.id.loginButton).isEnabled)
+        assertTrue(activity.findViewById<View>(R.id.emailInput).isEnabled)
+        assertTrue(activity.findViewById<View>(R.id.passwordInput).isEnabled)
     }
 
     // ==================== Helpers ====================
 
-    private fun triggerPairingAndAwait(code: String = "123456") {
-        activity.findViewById<EditText>(R.id.codeInput).setText(code)
-        activity.onPairClicked()
-        awaitPairingCompletion()
+    private fun triggerLoginAndAwait(
+        email: String = "user@example.com",
+        password: String = "password123"
+    ) {
+        activity.findViewById<EditText>(R.id.emailInput).setText(email)
+        activity.findViewById<EditText>(R.id.passwordInput).setText(password)
+        activity.onLoginClicked()
+        awaitLoginCompletion()
     }
 
     /**
-     * Waits for the pairing coroutine to complete by polling the job state
+     * Waits for the login coroutine to complete by polling the job state
      * and processing the main looper between polls.
-     *
-     * The coroutine suspends at the Retrofit HTTP call (OkHttp runs on its thread pool).
-     * When the response arrives, OkHttp posts the continuation to the main looper.
-     * Calling [shadowOf(activity.mainLooper).idle()] processes that continuation.
      */
-    private fun awaitPairingCompletion(timeoutMs: Long = 5000) {
+    private fun awaitLoginCompletion(timeoutMs: Long = 5000) {
         val deadline = System.currentTimeMillis() + timeoutMs
         while (System.currentTimeMillis() < deadline) {
             shadowOf(activity.mainLooper).idle()
-            if (activity.pairingJob?.isCompleted == true) return
+            if (activity.loginJob?.isCompleted == true) return
             Thread.sleep(50)
         }
         shadowOf(activity.mainLooper).idle()
         assertTrue(
-            "Pairing job did not complete within ${timeoutMs}ms",
-            activity.pairingJob?.isCompleted == true
+            "Login job did not complete within ${timeoutMs}ms",
+            activity.loginJob?.isCompleted == true
         )
     }
 }

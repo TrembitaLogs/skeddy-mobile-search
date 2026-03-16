@@ -79,7 +79,7 @@ class ServiceRestartJobService : JobService() {
             return false // Job completed, no need to reschedule
         }
 
-        // Check app state - only restart service in PAIRED or FORCE_UPDATE states
+        // Check app state - only restart service in LOGGED_IN or FORCE_UPDATE states
         val deviceTokenManager = DeviceTokenManager(applicationContext)
         val preferences = SkeddyPreferences(applicationContext)
         val appStateDeterminer = AppStateDeterminer(deviceTokenManager, preferences)
@@ -89,11 +89,11 @@ class ServiceRestartJobService : JobService() {
         val currentState = appStateDeterminer.determine(isAccessibilityEnabled)
 
         when (currentState) {
-            is AppState.Paired, is AppState.ForceUpdate -> {
+            is AppState.LoggedIn, is AppState.ForceUpdate -> {
                 Log.i(TAG, "onStartJob: App state=$currentState, proceeding with restart")
                 SkeddyLogger.i(TAG, "JobService: app state=$currentState, restarting service")
             }
-            is AppState.NotPaired, is AppState.NotConfigured -> {
+            is AppState.NotLoggedIn, is AppState.NotConfigured -> {
                 Log.i(TAG, "onStartJob: Skipping restart, state=$currentState")
                 SkeddyLogger.i(TAG, "JobService: skipping restart, state=$currentState")
                 clearMonitoringFlag(this)

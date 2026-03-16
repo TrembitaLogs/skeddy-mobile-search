@@ -88,15 +88,14 @@
 
     <!-- Server Error Messages -->
     <string name="error_message_server_unreachable">Unable to reach the server. Please check your internet connection.</string>
-    <string name="error_message_server_unauthorized">Session expired. Please pair your device again.</string>
+    <string name="error_message_server_unauthorized">Session expired. Please log in again.</string>
     <string name="error_message_server_rate_limited">Too many requests. Please try again later.</string>
     <string name="error_message_server_validation">Invalid data sent to server.</string>
     <string name="error_message_server_unavailable">Server is temporarily unavailable. Please try again later.</string>
     <string name="error_message_server_internal">Server error. Please try again later.</string>
 
-    <!-- Pairing Error Messages -->
-    <string name="error_message_pairing_invalid">Invalid or expired pairing code.</string>
-    <string name="error_message_pairing_used">This pairing code has already been used.</string>
+    <!-- Login Error Messages -->
+    <string name="error_message_login_invalid_credentials">Invalid email or password.</string>
 
     <!-- Debug -->
     <string name="btn_test_error">Test Error Display</string>
@@ -109,17 +108,17 @@
     <string name="battery_optimization_dialog_title">Disable Battery Optimization</string>
     <string name="battery_optimization_dialog_message">For reliable background monitoring, Skeddy needs to be exempt from battery optimization.\n\nThis ensures the app continues to check for high-value rides even when your phone is idle.</string>
 
-    <!-- Pairing Screen -->
-    <string name="pairing_title">Pair with Skeddy Main</string>
-    <string name="pairing_instructions">Enter pairing code from your main app</string>
-    <string name="pairing_hint">Enter 6-digit code</string>
-    <string name="pairing_button">Pair</string>
-    <string name="pairing_error_invalid">Invalid or expired code</string>
-    <string name="pairing_error_already_used">This code has already been used</string>
-    <string name="pairing_error_network">Network error. Check your connection and try again.</string>
-    <string name="pairing_error_unknown">Something went wrong. Please try again.</string>
-    <string name="pairing_success">Successfully paired!</string>
-    <string name="cd_pairing_logo">Skeddy Search logo</string>
+    <!-- Login Screen -->
+    <string name="login_title">Log in to Skeddy</string>
+    <string name="login_instructions">Use your Skeddy account credentials</string>
+    <string name="login_email_hint">Email</string>
+    <string name="login_password_hint">Password</string>
+    <string name="login_button">Log In</string>
+    <string name="login_error_invalid_credentials">Invalid email or password</string>
+    <string name="login_error_network">Network error. Check your connection and try again.</string>
+    <string name="login_error_unknown">Something went wrong. Please try again.</string>
+    <string name="login_success">Login successful!</string>
+    <string name="cd_login_logo">Skeddy Search logo</string>
 
     <!-- Setup Required Screen -->
     <string name="setup_required_title">Accessibility Service Required</string>

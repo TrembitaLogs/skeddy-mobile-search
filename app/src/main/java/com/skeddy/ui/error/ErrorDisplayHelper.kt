@@ -187,8 +187,7 @@ object ErrorDisplayHelper {
             is SkeddyError.ServerValidationError,
             is SkeddyError.ServerServiceUnavailable,
             is SkeddyError.ServerInternalError,
-            is SkeddyError.PairingCodeInvalidOrExpired,
-            is SkeddyError.PairingAlreadyUsed -> ErrorDisplayType.SNACKBAR
+            is SkeddyError.LoginInvalidCredentials -> ErrorDisplayType.SNACKBAR
         }
     }
 

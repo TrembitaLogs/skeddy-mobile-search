@@ -184,8 +184,8 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `navigateToPairing initial value is false`() {
-        assertEquals(false, viewModel.navigateToPairing.value)
+    fun `navigateToLogin initial value is false`() {
+        assertEquals(false, viewModel.navigateToLogin.value)
     }
 
     @Test
@@ -232,7 +232,7 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `toggleSearch unauthorized clears device token and navigates to pairing`() {
+    fun `toggleSearch unauthorized clears device token and navigates to login`() {
         coEvery { serverClient.deviceOverride(any()) } returns ApiResult.Unauthorized
         every { deviceTokenManager.clearDeviceToken() } just runs
 
@@ -240,7 +240,7 @@ class MainViewModelTest {
         testDispatcher.scheduler.advanceUntilIdle()
 
         verify { deviceTokenManager.clearDeviceToken() }
-        assertTrue(viewModel.navigateToPairing.value!!)
+        assertTrue(viewModel.navigateToLogin.value!!)
     }
 
     @Test
@@ -317,16 +317,16 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `clearNavigateToPairing resets to false`() {
+    fun `clearNavigateToLogin resets to false`() {
         coEvery { serverClient.deviceOverride(any()) } returns ApiResult.Unauthorized
         every { deviceTokenManager.clearDeviceToken() } just runs
 
         viewModel.toggleSearch()
         testDispatcher.scheduler.advanceUntilIdle()
-        assertTrue(viewModel.navigateToPairing.value!!)
+        assertTrue(viewModel.navigateToLogin.value!!)
 
-        viewModel.clearNavigateToPairing()
-        assertFalse(viewModel.navigateToPairing.value!!)
+        viewModel.clearNavigateToLogin()
+        assertFalse(viewModel.navigateToLogin.value!!)
     }
 
     // ==================== Force Update Tests ====================

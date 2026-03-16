@@ -26,9 +26,9 @@ import org.robolectric.shadows.ShadowLooper
  *
  * Verifies that MainActivity correctly routes to the appropriate screen
  * based on [AppState] determined by [AppStateDeterminer]:
- * - NOT_PAIRED   -> PairingActivity
+ * - NOT_LOGGED_IN   -> LoginActivity
  * - NOT_CONFIGURED -> SetupRequiredActivity
- * - PAIRED       -> stays on MainActivity
+ * - LOGGED_IN       -> stays on MainActivity
  * - FORCE_UPDATE -> ForceUpdateActivity
  *
  * Sets [com.google.android.material.R.style.Theme_Material3_DayNight]
@@ -61,32 +61,32 @@ class MainActivityStateRoutingTest {
         clearAccessibility()
     }
 
-    // ==================== NOT_PAIRED State ====================
+    // ==================== NOT_LOGGED_IN State ====================
 
     @Test
-    fun `NOT_PAIRED navigates to PairingActivity`() {
+    fun `NOT_LOGGED_IN navigates to LoginActivity`() {
         val activity = createActivity()
 
         val nextIntent = shadowOf(activity).nextStartedActivity
-        assertNotNull("Should navigate to PairingActivity", nextIntent)
-        assertEquals(PairingActivity::class.java.name, nextIntent.component?.className)
+        assertNotNull("Should navigate to LoginActivity", nextIntent)
+        assertEquals(LoginActivity::class.java.name, nextIntent.component?.className)
     }
 
     @Test
-    fun `NOT_PAIRED finishes MainActivity`() {
+    fun `NOT_LOGGED_IN finishes MainActivity`() {
         val activity = createActivity()
 
-        assertTrue("MainActivity should finish when NOT_PAIRED", activity.isFinishing)
+        assertTrue("MainActivity should finish when NOT_LOGGED_IN", activity.isFinishing)
     }
 
     @Test
-    fun `NOT_PAIRED sets NEW_TASK and CLEAR_TASK flags`() {
+    fun `NOT_LOGGED_IN sets NEW_TASK and CLEAR_TASK flags`() {
         val activity = createActivity()
 
         val nextIntent = shadowOf(activity).nextStartedActivity
         val expectedFlags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         assertEquals(
-            "PairingActivity intent should have NEW_TASK | CLEAR_TASK flags",
+            "LoginActivity intent should have NEW_TASK | CLEAR_TASK flags",
             expectedFlags,
             nextIntent.flags and expectedFlags
         )
@@ -115,35 +115,35 @@ class MainActivityStateRoutingTest {
         assertTrue("MainActivity should finish when NOT_CONFIGURED", activity.isFinishing)
     }
 
-    // ==================== PAIRED State ====================
+    // ==================== LOGGED_IN State ====================
 
     @Test
-    fun `PAIRED stays on MainActivity`() {
+    fun `LOGGED_IN stays on MainActivity`() {
         deviceTokenManager.saveDeviceToken("test-token")
         enableAccessibility()
 
         val activity = createActivity()
 
         val nextIntent = shadowOf(activity).nextStartedActivity
-        // In PAIRED state, no routing should occur.
+        // In LOGGED_IN state, no routing should occur.
         // nextStartedActivity may be non-null if bindService or other code starts an activity,
-        // so we check that it's NOT PairingActivity, SetupRequiredActivity, or ForceUpdateActivity.
+        // so we check that it's NOT LoginActivity, SetupRequiredActivity, or ForceUpdateActivity.
         if (nextIntent != null) {
             val targetClass = nextIntent.component?.className
             assertFalse(
-                "Should NOT navigate to PairingActivity when PAIRED",
-                targetClass == PairingActivity::class.java.name
+                "Should NOT navigate to LoginActivity when LOGGED_IN",
+                targetClass == LoginActivity::class.java.name
             )
             assertFalse(
-                "Should NOT navigate to SetupRequiredActivity when PAIRED",
+                "Should NOT navigate to SetupRequiredActivity when LOGGED_IN",
                 targetClass == SetupRequiredActivity::class.java.name
             )
             assertFalse(
-                "Should NOT navigate to ForceUpdateActivity when PAIRED",
+                "Should NOT navigate to ForceUpdateActivity when LOGGED_IN",
                 targetClass == ForceUpdateActivity::class.java.name
             )
         }
-        assertFalse("MainActivity should NOT finish when PAIRED", activity.isFinishing)
+        assertFalse("MainActivity should NOT finish when LOGGED_IN", activity.isFinishing)
     }
 
     // ==================== FORCE_UPDATE State ====================
@@ -197,7 +197,7 @@ class MainActivityStateRoutingTest {
 
     @Test
     fun `onResume re-evaluates state when token is cleared`() {
-        // Start as PAIRED
+        // Start as LOGGED_IN
         deviceTokenManager.saveDeviceToken("test-token")
         enableAccessibility()
 
@@ -208,20 +208,20 @@ class MainActivityStateRoutingTest {
 
         assertFalse("Should NOT be finishing initially", activity.isFinishing)
 
-        // Clear token -> should become NOT_PAIRED on next resume
+        // Clear token -> should become NOT_LOGGED_IN on next resume
         deviceTokenManager.clearDeviceToken()
         controller.pause().resume()
 
         val nextIntent = shadowOf(activity).nextStartedActivity
-        assertNotNull("Should navigate to PairingActivity after token cleared", nextIntent)
-        assertEquals(PairingActivity::class.java.name, nextIntent.component?.className)
+        assertNotNull("Should navigate to LoginActivity after token cleared", nextIntent)
+        assertEquals(LoginActivity::class.java.name, nextIntent.component?.className)
     }
 
     // ==================== ACTION_UNPAIRED Broadcast (Task 24.3) ====================
 
     @Test
-    fun `ACTION_UNPAIRED broadcast navigates to PairingActivity`() {
-        // Start as PAIRED
+    fun `ACTION_UNPAIRED broadcast navigates to LoginActivity`() {
+        // Start as LOGGED_IN
         deviceTokenManager.saveDeviceToken("test-token")
         enableAccessibility()
 
@@ -244,8 +244,8 @@ class MainActivityStateRoutingTest {
         ShadowLooper.idleMainLooper()
 
         val nextIntent = shadow.nextStartedActivity
-        assertNotNull("Should navigate to PairingActivity after UNPAIRED broadcast", nextIntent)
-        assertEquals(PairingActivity::class.java.name, nextIntent.component?.className)
+        assertNotNull("Should navigate to LoginActivity after UNPAIRED broadcast", nextIntent)
+        assertEquals(LoginActivity::class.java.name, nextIntent.component?.className)
     }
 
     @Test
@@ -290,10 +290,10 @@ class MainActivityStateRoutingTest {
         ShadowLooper.idleMainLooper()
 
         val nextIntent = shadow.nextStartedActivity
-        assertNotNull("PairingActivity intent should be started", nextIntent)
+        assertNotNull("LoginActivity intent should be started", nextIntent)
         val expectedFlags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         assertEquals(
-            "PairingActivity intent should have NEW_TASK | CLEAR_TASK flags",
+            "LoginActivity intent should have NEW_TASK | CLEAR_TASK flags",
             expectedFlags,
             nextIntent.flags and expectedFlags
         )

@@ -160,13 +160,8 @@ class SkeddyErrorTest {
     }
 
     @Test
-    fun `PairingCodeInvalidOrExpired has code E026`() {
-        assertEquals("E026", SkeddyError.PairingCodeInvalidOrExpired.code)
-    }
-
-    @Test
-    fun `PairingAlreadyUsed has code E027`() {
-        assertEquals("E027", SkeddyError.PairingAlreadyUsed.code)
+    fun `LoginInvalidCredentials has code E026`() {
+        assertEquals("E026", SkeddyError.LoginInvalidCredentials.code)
     }
 
     // ==================== Sealed Class Exhaustive Checking ====================
@@ -196,8 +191,7 @@ class SkeddyErrorTest {
                 is SkeddyError.ServerValidationError -> "server_validation"
                 is SkeddyError.ServerServiceUnavailable -> "server_unavailable"
                 is SkeddyError.ServerInternalError -> "server_internal"
-                is SkeddyError.PairingCodeInvalidOrExpired -> "pairing_invalid"
-                is SkeddyError.PairingAlreadyUsed -> "pairing_used"
+                is SkeddyError.LoginInvalidCredentials -> "login_invalid_credentials"
             }
             assertTrue(
                 "When expression should return non-empty result for ${error.code}",
@@ -280,8 +274,7 @@ class SkeddyErrorTest {
         assertEquals(SkeddyError.ServerValidationError, SkeddyError.fromCode("E023"))
         assertEquals(SkeddyError.ServerServiceUnavailable, SkeddyError.fromCode("E024"))
         assertEquals(SkeddyError.ServerInternalError, SkeddyError.fromCode("E025"))
-        assertEquals(SkeddyError.PairingCodeInvalidOrExpired, SkeddyError.fromCode("E026"))
-        assertEquals(SkeddyError.PairingAlreadyUsed, SkeddyError.fromCode("E027"))
+        assertEquals(SkeddyError.LoginInvalidCredentials, SkeddyError.fromCode("E026"))
     }
 
     @Test
@@ -319,13 +312,12 @@ class SkeddyErrorTest {
         assertTrue(errors.contains(SkeddyError.ServerValidationError))
         assertTrue(errors.contains(SkeddyError.ServerServiceUnavailable))
         assertTrue(errors.contains(SkeddyError.ServerInternalError))
-        assertTrue(errors.contains(SkeddyError.PairingCodeInvalidOrExpired))
-        assertTrue(errors.contains(SkeddyError.PairingAlreadyUsed))
+        assertTrue(errors.contains(SkeddyError.LoginInvalidCredentials))
     }
 
     @Test
     fun `allStaticErrors has expected count`() {
-        assertEquals(19, SkeddyError.allStaticErrors.size)
+        assertEquals(18, SkeddyError.allStaticErrors.size)
     }
 
     // ==================== Data Class Equality ====================

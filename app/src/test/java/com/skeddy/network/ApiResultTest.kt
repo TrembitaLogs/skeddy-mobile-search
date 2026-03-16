@@ -75,40 +75,28 @@ class ApiResultTest {
     }
 
     @Test
-    fun `PairingError with INVALID_OR_EXPIRED`() {
-        val result: ApiResult<String> = ApiResult.PairingError(PairingErrorReason.INVALID_OR_EXPIRED)
+    fun `LoginError with INVALID_CREDENTIALS`() {
+        val result: ApiResult<String> = ApiResult.LoginError(LoginErrorReason.INVALID_CREDENTIALS)
 
-        assertTrue(result is ApiResult.PairingError)
+        assertTrue(result is ApiResult.LoginError)
         assertEquals(
-            PairingErrorReason.INVALID_OR_EXPIRED,
-            (result as ApiResult.PairingError).reason
+            LoginErrorReason.INVALID_CREDENTIALS,
+            (result as ApiResult.LoginError).reason
         )
     }
 
-    @Test
-    fun `PairingError with ALREADY_USED`() {
-        val result: ApiResult<String> = ApiResult.PairingError(PairingErrorReason.ALREADY_USED)
-
-        assertTrue(result is ApiResult.PairingError)
-        assertEquals(
-            PairingErrorReason.ALREADY_USED,
-            (result as ApiResult.PairingError).reason
-        )
-    }
-
-    // ==================== PairingErrorReason ====================
+    // ==================== LoginErrorReason ====================
 
     @Test
-    fun `PairingErrorReason has exactly two values`() {
-        assertEquals(2, PairingErrorReason.entries.size)
+    fun `LoginErrorReason has exactly one value`() {
+        assertEquals(1, LoginErrorReason.entries.size)
     }
 
     @Test
-    fun `PairingErrorReason values are correct`() {
-        val values = PairingErrorReason.entries.map { it.name }
+    fun `LoginErrorReason values are correct`() {
+        val values = LoginErrorReason.entries.map { it.name }
 
-        assertTrue(values.contains("INVALID_OR_EXPIRED"))
-        assertTrue(values.contains("ALREADY_USED"))
+        assertTrue(values.contains("INVALID_CREDENTIALS"))
     }
 
     // ==================== Pattern Matching (when expression) ====================
@@ -123,8 +111,7 @@ class ApiResultTest {
             ApiResult.RateLimited(60),
             ApiResult.ServiceUnavailable,
             ApiResult.ServerError,
-            ApiResult.PairingError(PairingErrorReason.INVALID_OR_EXPIRED),
-            ApiResult.PairingError(PairingErrorReason.ALREADY_USED)
+            ApiResult.LoginError(LoginErrorReason.INVALID_CREDENTIALS)
         )
 
         results.forEach { result ->
@@ -136,7 +123,7 @@ class ApiResultTest {
                 is ApiResult.RateLimited -> "rate_limited"
                 is ApiResult.ServiceUnavailable -> "unavailable"
                 is ApiResult.ServerError -> "server"
-                is ApiResult.PairingError -> "pairing"
+                is ApiResult.LoginError -> "login"
             }
             assertTrue(label.isNotBlank())
         }
@@ -182,8 +169,8 @@ class ApiResultTest {
     }
 
     @Test
-    fun `isSuccess returns false for PairingError`() {
-        assertFalse(ApiResult.PairingError(PairingErrorReason.INVALID_OR_EXPIRED).isSuccess())
+    fun `isSuccess returns false for LoginError`() {
+        assertFalse(ApiResult.LoginError(LoginErrorReason.INVALID_CREDENTIALS).isSuccess())
     }
 
     // ==================== getOrNull() ====================
@@ -238,8 +225,8 @@ class ApiResultTest {
     }
 
     @Test
-    fun `getOrNull returns null for PairingError`() {
-        val result: ApiResult<String> = ApiResult.PairingError(PairingErrorReason.ALREADY_USED)
+    fun `getOrNull returns null for LoginError`() {
+        val result: ApiResult<String> = ApiResult.LoginError(LoginErrorReason.INVALID_CREDENTIALS)
 
         assertNull(result.getOrNull())
     }
@@ -341,20 +328,20 @@ class ApiResultTest {
     }
 
     @Test
-    fun `fold calls onFailure for PairingError`() {
-        val result: ApiResult<Int> = ApiResult.PairingError(PairingErrorReason.INVALID_OR_EXPIRED)
+    fun `fold calls onFailure for LoginError`() {
+        val result: ApiResult<Int> = ApiResult.LoginError(LoginErrorReason.INVALID_CREDENTIALS)
 
         val folded = result.fold(
             onSuccess = { "value=$it" },
             onFailure = { error ->
                 when (error) {
-                    is ApiResult.PairingError -> "pairing:${error.reason}"
+                    is ApiResult.LoginError -> "login:${error.reason}"
                     else -> "other"
                 }
             }
         )
 
-        assertEquals("pairing:INVALID_OR_EXPIRED", folded)
+        assertEquals("login:INVALID_CREDENTIALS", folded)
     }
 
     // ==================== Covariance (out T) ====================
@@ -403,13 +390,11 @@ class ApiResultTest {
     }
 
     @Test
-    fun `PairingError equality works correctly`() {
-        val a = ApiResult.PairingError(PairingErrorReason.INVALID_OR_EXPIRED)
-        val b = ApiResult.PairingError(PairingErrorReason.INVALID_OR_EXPIRED)
-        val c = ApiResult.PairingError(PairingErrorReason.ALREADY_USED)
+    fun `LoginError equality works correctly`() {
+        val a = ApiResult.LoginError(LoginErrorReason.INVALID_CREDENTIALS)
+        val b = ApiResult.LoginError(LoginErrorReason.INVALID_CREDENTIALS)
 
         assertEquals(a, b)
-        assertTrue(a != c)
     }
 
     @Test

@@ -6,8 +6,8 @@ package com.skeddy.network
  * Uses covariant type parameter (out T) so that error subtypes with Nothing
  * are subtypes of any ApiResult<T>.
  *
- * PairingError is used ONLY for confirmPairing() endpoint.
- * Other endpoints never return PairingError — they fall through to the generic
+ * LoginError is used ONLY for searchLogin() endpoint.
+ * Other endpoints never return LoginError — they fall through to the generic
  * error types (ValidationError, ServiceUnavailable, etc).
  */
 sealed class ApiResult<out T> {
@@ -26,22 +26,18 @@ sealed class ApiResult<out T> {
 
     data object ServerError : ApiResult<Nothing>()
 
-    data class PairingError(val reason: PairingErrorReason) : ApiResult<Nothing>()
+    data class LoginError(val reason: LoginErrorReason) : ApiResult<Nothing>()
 }
 
 /**
- * Pairing-specific error reasons mapped from API error codes.
+ * Login-specific error reasons mapped from API error codes.
  *
- * API contract combines 'invalid code' and 'expired code' under a single
- * HTTP 404 (error code PAIRING_CODE_EXPIRED), so the enum has
- * INVALID_OR_EXPIRED instead of two separate values.
+ * HTTP 401 from the search-login endpoint indicates invalid credentials
+ * (wrong email or password).
  */
-enum class PairingErrorReason {
-    /** HTTP 404 — code not found or expired (error code: PAIRING_CODE_EXPIRED) */
-    INVALID_OR_EXPIRED,
-
-    /** HTTP 409 — code already used (error code: PAIRING_CODE_USED) */
-    ALREADY_USED
+enum class LoginErrorReason {
+    /** HTTP 401 — invalid email or password */
+    INVALID_CREDENTIALS
 }
 
 /** Returns true if this result is [ApiResult.Success]. */
@@ -68,5 +64,5 @@ inline fun <T, R> ApiResult<T>.fold(
     is ApiResult.RateLimited -> onFailure(this)
     is ApiResult.ServiceUnavailable -> onFailure(this)
     is ApiResult.ServerError -> onFailure(this)
-    is ApiResult.PairingError -> onFailure(this)
+    is ApiResult.LoginError -> onFailure(this)
 }

@@ -47,7 +47,7 @@ import java.util.concurrent.TimeUnit
  * - Server error recovery (503, 5xx, 422, consecutive failures)
  * - Auto-resume after server recovery
  * - State preservation during outage (stats, batch_id)
- * - Token invalidation recovery (401/403 → re-pairing)
+ * - Token invalidation recovery (401/403 → re-login)
  * - Force update handling (stop search, continue ping, auto-recovery)
  * - MockWebServer sequence scenarios (failure → success, response toggles)
  */
@@ -502,7 +502,7 @@ class ErrorRecoveryIntegrationTest {
     // ==================== 5. Token invalidation recovery ====================
 
     @Test
-    fun `401 triggers re-pairing flow`() = kotlinx.coroutines.test.runTest {
+    fun `401 triggers re-login flow`() = kotlinx.coroutines.test.runTest {
         service.startMonitoring()
 
         mockWebServer.enqueue(
@@ -517,7 +517,7 @@ class ErrorRecoveryIntegrationTest {
         verify(atLeast = 1) { mockDeviceTokenManager.clearDeviceToken() }
         assertFalse("Monitoring should be stopped after 401", service.isMonitoringActive())
 
-        // Unpaired broadcast sent to trigger PairingActivity
+        // Unpaired broadcast sent to trigger LoginActivity
         val shadowApp = Shadows.shadowOf(RuntimeEnvironment.getApplication())
         val unpairedIntent = shadowApp.broadcastIntents.findLast {
             it.action == MonitoringForegroundService.ACTION_UNPAIRED
@@ -526,13 +526,13 @@ class ErrorRecoveryIntegrationTest {
     }
 
     @Test
-    fun `403 triggers same re-pairing flow as 401`() = kotlinx.coroutines.test.runTest {
+    fun `403 triggers same re-login flow as 401`() = kotlinx.coroutines.test.runTest {
         service.startMonitoring()
 
         mockWebServer.enqueue(
             MockResponse()
                 .setResponseCode(403)
-                .setBody("""{"error":{"code":"DEVICE_NOT_PAIRED","message":"Device not paired"}}""")
+                .setBody("""{"error":{"code":"DEVICE_NOT_LOGGED_IN","message":"Device not paired"}}""")
         )
 
         service.monitoringCycleWithPing()
@@ -585,12 +585,12 @@ class ErrorRecoveryIntegrationTest {
         assertFalse("Monitoring should be stopped", service.isMonitoringActive())
         verify(atLeast = 1) { mockDeviceTokenManager.clearDeviceToken() }
 
-        // Unpaired broadcast signals UI to transition to NOT_PAIRED state
+        // Unpaired broadcast signals UI to transition to NOT_LOGGED_IN state
         val shadowApp = Shadows.shadowOf(RuntimeEnvironment.getApplication())
         val unpairedIntent = shadowApp.broadcastIntents.findLast {
             it.action == MonitoringForegroundService.ACTION_UNPAIRED
         }
-        assertNotNull("ACTION_UNPAIRED broadcast triggers NOT_PAIRED state", unpairedIntent)
+        assertNotNull("ACTION_UNPAIRED broadcast triggers NOT_LOGGED_IN state", unpairedIntent)
     }
 
     // ==================== 6. Force update handling ====================

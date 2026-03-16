@@ -45,12 +45,12 @@ import java.util.Date
 import java.util.Locale
 
 /**
- * Головний екран додатку з тестовим UI для Accessibility Service.
+ * Main screen of the app with test UI for Accessibility Service.
  *
- * Призначення:
- * - Відображати статус Accessibility Service
- * - Надавати кнопки для тестування функціоналу сервісу
- * - Показувати лог результатів тестування
+ * Purpose:
+ * - Display Accessibility Service status
+ * - Provide buttons for testing service functionality
+ * - Show log of test results
  */
 class MainActivity : AppCompatActivity() {
 
@@ -155,7 +155,7 @@ class MainActivity : AppCompatActivity() {
 
                 MonitoringForegroundService.ACTION_UNPAIRED -> {
                     Log.i(TAG, "Received UNPAIRED: device token invalidated (401/403)")
-                    startActivity(PairingActivity.createIntent(this@MainActivity).apply {
+                    startActivity(LoginActivity.createIntent(this@MainActivity).apply {
                         flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                     })
                     finish()
@@ -270,10 +270,10 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        viewModel.navigateToPairing.observe(this) { shouldNavigate ->
+        viewModel.navigateToLogin.observe(this) { shouldNavigate ->
             if (shouldNavigate) {
-                viewModel.clearNavigateToPairing()
-                startActivity(PairingActivity.createIntent(this).apply {
+                viewModel.clearNavigateToLogin()
+                startActivity(LoginActivity.createIntent(this).apply {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 })
                 finish()
@@ -286,8 +286,8 @@ class MainActivity : AppCompatActivity() {
                 if (it) {
                     startMonitoringService()
                 }
-                // Stop: не зупиняємо сервіс — він продовжує ping-цикл.
-                // Сервер відповість search:false і сервіс не запускатиме пошук.
+                // Stop: we don't stop the service — it continues the ping cycle.
+                // Server will respond with search:false and the service won't start searching.
             }
         }
 
@@ -476,8 +476,8 @@ class MainActivity : AppCompatActivity() {
         )
 
         when (val state = appStateDeterminer.determine(isAccessibilityEnabled)) {
-            is AppState.NotPaired -> {
-                startActivity(PairingActivity.createIntent(this).apply {
+            is AppState.NotLoggedIn -> {
+                startActivity(LoginActivity.createIntent(this).apply {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 })
                 finish()
@@ -492,7 +492,7 @@ class MainActivity : AppCompatActivity() {
                 startActivity(ForceUpdateActivity.createIntent(this, state.updateUrl))
                 return
             }
-            is AppState.Paired -> {
+            is AppState.LoggedIn -> {
                 // Continue with main screen setup below
             }
         }
@@ -555,7 +555,7 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * Ensures the monitoring foreground service is started with ACTION_START.
-     * Called from onResume() to cover Cold Start and After Pairing scenarios
+     * Called from onResume() to cover Cold Start and After Login scenarios
      * where bindService alone doesn't trigger onStartCommand/startMonitoring.
      * Safe to call repeatedly — startMonitoring() guards with if(!isMonitoring).
      */

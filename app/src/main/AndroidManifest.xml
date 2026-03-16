@@ -15,7 +15,7 @@
     <!-- Boot completed receiver permission -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
-    <!-- Internet permission for server communication (ping, pairing, ride reporting) -->
+    <!-- Internet permission for server communication (ping, login, ride reporting) -->
     <uses-permission android:name="android.permission.INTERNET" />
 
     <!-- Query Lyft Driver app for auto-recovery (Android 11+) -->
@@ -43,9 +43,9 @@
         </activity>
 
         <activity
-            android:name=".ui.PairingActivity"
+            android:name=".ui.LoginActivity"
             android:exported="false"
-            android:label="@string/pairing_title" />
+            android:label="@string/login_title" />
 
         <activity
             android:name=".ui.SetupRequiredActivity"

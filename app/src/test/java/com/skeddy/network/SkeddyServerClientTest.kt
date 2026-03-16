@@ -2,7 +2,7 @@ package com.skeddy.network
 
 import com.skeddy.network.models.DeviceHealth
 import com.skeddy.network.models.DeviceOverrideRequest
-import com.skeddy.network.models.PairingRequest
+import com.skeddy.network.models.SearchLoginRequest
 import com.skeddy.network.models.PingRequest
 import com.skeddy.network.models.PingStats
 import com.skeddy.network.models.RideData
@@ -28,7 +28,7 @@ import retrofit2.converter.kotlinx.serialization.asConverterFactory
 /**
  * Unit tests for [SkeddyServerClient].
  * Covers success paths for all 4 endpoints, generic error handling
- * (401/403/422/429/503/5xx/IOException), and pairing-specific error mapping (404/409).
+ * (401/403/422/429/503/5xx/IOException), and login-specific error mapping (401).
  */
 class SkeddyServerClientTest {
 
@@ -102,17 +102,17 @@ class SkeddyServerClientTest {
         assertEquals("ride-abc-123", data.rideId)
     }
 
-    // ==================== confirmPairing() — Success ====================
+    // ==================== searchLogin() — Success ====================
 
     @Test
-    fun `confirmPairing returns Success with parsed response on 200`() = runBlocking {
+    fun `searchLogin returns Success with parsed response on 200`() = runBlocking {
         mockWebServer.enqueue(
             MockResponse()
                 .setResponseCode(200)
                 .setBody("""{"device_token":"token-xyz","user_id":"user-789"}""")
         )
 
-        val result = client.confirmPairing(createPairingRequest())
+        val result = client.searchLogin(createSearchLoginRequest())
 
         assertTrue(result is ApiResult.Success)
         val data = (result as ApiResult.Success).data
@@ -307,74 +307,57 @@ class SkeddyServerClientTest {
         verify(exactly = 0) { deviceTokenManager.clearDeviceToken() }
     }
 
-    // ==================== Pairing-Specific Error Handling ====================
+    // ==================== Login-Specific Error Handling ====================
 
     @Test
-    fun `confirmPairing returns PairingError INVALID_OR_EXPIRED on 404`() = runBlocking {
+    fun `searchLogin returns LoginError INVALID_CREDENTIALS on 401`() = runBlocking {
         mockWebServer.enqueue(
             MockResponse()
-                .setResponseCode(404)
-                .setBody("""{"error":{"code":"PAIRING_CODE_EXPIRED","message":"Invalid or expired pairing code"}}""")
+                .setResponseCode(401)
+                .setBody("""{"error":{"code":"INVALID_CREDENTIALS","message":"Invalid email or password"}}""")
         )
 
-        val result = client.confirmPairing(createPairingRequest())
+        val result = client.searchLogin(createSearchLoginRequest())
 
-        assertTrue(result is ApiResult.PairingError)
+        assertTrue(result is ApiResult.LoginError)
         assertEquals(
-            PairingErrorReason.INVALID_OR_EXPIRED,
-            (result as ApiResult.PairingError).reason
+            LoginErrorReason.INVALID_CREDENTIALS,
+            (result as ApiResult.LoginError).reason
         )
     }
 
     @Test
-    fun `confirmPairing returns PairingError ALREADY_USED on 409`() = runBlocking {
-        mockWebServer.enqueue(
-            MockResponse()
-                .setResponseCode(409)
-                .setBody("""{"error":{"code":"PAIRING_CODE_USED","message":"Code already used"}}""")
-        )
-
-        val result = client.confirmPairing(createPairingRequest())
-
-        assertTrue(result is ApiResult.PairingError)
-        assertEquals(
-            PairingErrorReason.ALREADY_USED,
-            (result as ApiResult.PairingError).reason
-        )
-    }
-
-    @Test
-    fun `confirmPairing falls through to ValidationError on 422`() = runBlocking {
+    fun `searchLogin falls through to ValidationError on 422`() = runBlocking {
         mockWebServer.enqueue(
             MockResponse()
                 .setResponseCode(422)
                 .setBody("""{"error":{"code":"INVALID_TIMEZONE","message":"Invalid timezone identifier"}}""")
         )
 
-        val result = client.confirmPairing(createPairingRequest())
+        val result = client.searchLogin(createSearchLoginRequest())
 
         assertTrue(result is ApiResult.ValidationError)
         assertEquals("Invalid timezone identifier", (result as ApiResult.ValidationError).message)
     }
 
     @Test
-    fun `confirmPairing falls through to ServiceUnavailable on 503`() = runBlocking {
+    fun `searchLogin falls through to ServiceUnavailable on 503`() = runBlocking {
         mockWebServer.enqueue(
             MockResponse()
                 .setResponseCode(503)
                 .setBody("""{"error":{"code":"SERVICE_UNAVAILABLE","message":"Redis unavailable"}}""")
         )
 
-        val result = client.confirmPairing(createPairingRequest())
+        val result = client.searchLogin(createSearchLoginRequest())
 
         assertTrue(result is ApiResult.ServiceUnavailable)
     }
 
     @Test
-    fun `confirmPairing returns NetworkError on network failure`() = runBlocking {
+    fun `searchLogin returns NetworkError on network failure`() = runBlocking {
         mockWebServer.shutdown()
 
-        val result = client.confirmPairing(createPairingRequest())
+        val result = client.searchLogin(createSearchLoginRequest())
 
         assertTrue(result is ApiResult.NetworkError)
     }
@@ -413,8 +396,9 @@ class SkeddyServerClientTest {
         )
     )
 
-    private fun createPairingRequest() = PairingRequest(
-        code = "123456",
+    private fun createSearchLoginRequest() = SearchLoginRequest(
+        email = "user@example.com",
+        password = "password123",
         deviceId = "test-device-id",
         timezone = "America/New_York"
     )
