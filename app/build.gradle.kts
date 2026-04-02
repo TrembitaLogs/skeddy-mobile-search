@@ -18,7 +18,7 @@ android {
         minSdk = 28
         targetSdk = 34
         versionCode = (project.findProperty("versionCode") as? String)?.toIntOrNull() ?: 1
-        versionName = (project.findProperty("versionName") as? String) ?: "1.0-dev"
+        versionName = (project.findProperty("versionName") as? String) ?: "1.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -103,6 +103,10 @@ dependencies {
 
     // Encrypted Storage
     implementation(libs.androidx.security.crypto)
+
+    // Location
+    implementation(libs.play.services.location)
+    implementation(libs.kotlinx.coroutines.play.services)
 
     // Testing
     testImplementation(libs.junit)

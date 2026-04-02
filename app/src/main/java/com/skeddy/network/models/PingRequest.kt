@@ -11,7 +11,14 @@ data class PingRequest(
     val stats: PingStats,
     @SerialName("last_cycle_duration_ms") val lastCycleDurationMs: Int? = null,
     /** Verification results for rides requested by the server in the previous verify_rides. */
-    @SerialName("ride_statuses") val rideStatuses: List<RideStatusReport>? = null
+    @SerialName("ride_statuses") val rideStatuses: List<RideStatusReport>? = null,
+    val location: DeviceLocation? = null
+)
+
+@Serializable
+data class DeviceLocation(
+    val latitude: Double,
+    val longitude: Double
 )
 
 @Serializable

@@ -47,6 +47,7 @@ import com.skeddy.recovery.AutoRecoveryManager
 import com.skeddy.logging.SkeddyLogger
 import com.skeddy.ui.MainActivity
 import com.skeddy.util.DeviceHealthCollector
+import com.skeddy.util.LocationCollector
 import com.skeddy.utils.PermissionUtils
 import android.view.accessibility.AccessibilityNodeInfo
 import com.skeddy.BuildConfig
@@ -360,6 +361,9 @@ class MonitoringForegroundService : Service() {
     /** Collector for device health data (accessibility, Lyft, screen state) */
     private lateinit var deviceHealthCollector: DeviceHealthCollector
 
+    /** Collector for device GPS coordinates */
+    private lateinit var locationCollector: LocationCollector
+
     /** Notification manager for high-value ride alerts */
     private lateinit var rideNotificationManager: SkeddyNotificationManager
 
@@ -470,6 +474,9 @@ class MonitoringForegroundService : Service() {
 
         // Initialize device health collector
         deviceHealthCollector = DeviceHealthCollector(this)
+
+        // Initialize location collector
+        locationCollector = LocationCollector(this)
 
         // Initialize network dependencies
         deviceTokenManager = DeviceTokenManager(this)
@@ -1293,14 +1300,15 @@ class MonitoringForegroundService : Service() {
      * Uses [DeviceHealthCollector] for device health (accessibility, Lyft, screen),
      * real values for timezone, app version, and accumulated stats.
      */
-    internal fun buildPingRequest(): PingRequest {
+    internal suspend fun buildPingRequest(): PingRequest {
         return PingRequest(
             timezone = java.util.TimeZone.getDefault().id,
             appVersion = BuildConfig.VERSION_NAME,
             deviceHealth = deviceHealthCollector.collect(),
             stats = pendingStats.toPingStats(),
             lastCycleDurationMs = lastCycleDurationMs?.toInt(),
-            rideStatuses = pendingVerification.toRideStatusList()
+            rideStatuses = pendingVerification.toRideStatusList(),
+            location = locationCollector.collect()
         )
     }
 

@@ -78,11 +78,28 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private val locationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            Log.i(TAG, "ACCESS_FINE_LOCATION permission granted")
+            appendLog("Location permission granted")
+            dismissLocationDialogIfShowing()
+            // Continue permission sequence
+            checkPermissionsInSequence()
+        } else {
+            Log.w(TAG, "ACCESS_FINE_LOCATION permission denied")
+            appendLog("Location permission denied - required for app operation")
+            showLocationPermissionDialog()
+        }
+    }
+
     private var monitoringService: MonitoringForegroundService? = null
     private var isServiceBound = false
     private var isMonitoringActive = false
     private var accessibilityDialog: AlertDialog? = null
     private var batteryOptimizationDialog: AlertDialog? = null
+    private var locationDialog: AlertDialog? = null
 
     /**
      * BroadcastReceiver for monitoring status updates and new ride notifications.
@@ -512,7 +529,7 @@ class MainActivity : AppCompatActivity() {
     /**
      * Checks required permissions in sequence.
      * Only proceeds to the next permission when the previous one is granted.
-     * Order: 1. Accessibility Service -> 2. Battery Optimization -> 3. Notifications
+     * Order: 1. Accessibility Service -> 2. Battery Optimization -> 3. Location (mandatory) -> 4. Notifications
      */
     private fun checkPermissionsInSequence() {
         // Step 1: Check Accessibility Service
@@ -522,6 +539,7 @@ class MainActivity : AppCompatActivity() {
         )
         if (!isAccessibilityEnabled) {
             dismissBatteryOptimizationDialogIfShowing()
+            dismissLocationDialogIfShowing()
             showAccessibilityPermissionDialog()
             return // Wait for accessibility to be granted
         }
@@ -530,13 +548,76 @@ class MainActivity : AppCompatActivity() {
         // Step 2: Check Battery Optimization
         val isBatteryOptimizationDisabled = BatteryOptimizationHelper.isIgnoringBatteryOptimizations(this)
         if (!isBatteryOptimizationDisabled) {
+            dismissLocationDialogIfShowing()
             showBatteryOptimizationPermissionDialog()
             return // Wait for battery optimization to be disabled
         }
         dismissBatteryOptimizationDialogIfShowing()
 
-        // Step 3: Check Notification Permission (only after previous permissions are granted)
+        // Step 3: Check Location Permission (mandatory)
+        if (!isLocationPermissionGranted()) {
+            requestLocationPermission()
+            return // Wait for location to be granted
+        }
+        dismissLocationDialogIfShowing()
+
+        // Step 4: Check Notification Permission (only after previous permissions are granted)
         checkNotificationPermission()
+    }
+
+    private fun isLocationPermissionGranted(): Boolean {
+        return ContextCompat.checkSelfPermission(
+            this, Manifest.permission.ACCESS_FINE_LOCATION
+        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun requestLocationPermission() {
+        if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
+            showLocationPermissionRationale()
+        } else {
+            locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+    }
+
+    private fun showLocationPermissionRationale() {
+        if (locationDialog?.isShowing == true) return
+
+        locationDialog = AlertDialog.Builder(this)
+            .setTitle(R.string.location_permission_title)
+            .setMessage(R.string.location_permission_rationale)
+            .setPositiveButton(R.string.btn_grant_permission) { _, _ ->
+                locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            }
+            .setNegativeButton(R.string.btn_exit) { _, _ ->
+                finish()
+            }
+            .setCancelable(false)
+            .show()
+    }
+
+    private fun showLocationPermissionDialog() {
+        if (locationDialog?.isShowing == true) return
+
+        locationDialog = AlertDialog.Builder(this)
+            .setTitle(R.string.location_permission_title)
+            .setMessage(R.string.location_permission_message)
+            .setPositiveButton(R.string.btn_grant_permission) { _, _ ->
+                locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            }
+            .setNegativeButton(R.string.btn_exit) { _, _ ->
+                finish()
+            }
+            .setCancelable(false)
+            .show()
+    }
+
+    private fun dismissLocationDialogIfShowing() {
+        locationDialog?.let {
+            if (it.isShowing) {
+                it.dismiss()
+            }
+        }
+        locationDialog = null
     }
 
     override fun onPause() {
