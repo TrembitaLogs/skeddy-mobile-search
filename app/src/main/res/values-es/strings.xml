@@ -45,6 +45,11 @@
     <string name="btn_open_settings">Abrir Configuración</string>
     <string name="btn_exit">Salir</string>
 
+    <!-- Location Permission Dialog -->
+    <string name="location_permission_title">Activar Acceso a Ubicación</string>
+    <string name="location_permission_message">Skeddy necesita permiso de ubicación para reportar las coordenadas GPS del dispositivo al servidor.\n\nSin este permiso, la aplicación no puede funcionar.</string>
+    <string name="location_permission_rationale">Skeddy requiere acceso a la ubicación para rastrear dónde se encuentra este dispositivo de búsqueda.\n\nPor favor, conceda el permiso para continuar.</string>
+
     <!-- Content Descriptions -->
     <string name="cd_status_indicator">Indicador de estado del servicio</string>
 

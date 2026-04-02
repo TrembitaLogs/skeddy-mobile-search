@@ -50,6 +50,11 @@
     <string name="btn_open_settings">Open Settings</string>
     <string name="btn_exit">Exit</string>
 
+    <!-- Location Permission Dialog -->
+    <string name="location_permission_title">Enable Location Access</string>
+    <string name="location_permission_message">Skeddy needs location permission to report the device\'s GPS coordinates to the server.\n\nWithout this permission, the app cannot function.</string>
+    <string name="location_permission_rationale">Skeddy requires location access to track where this search device is located.\n\nPlease grant the permission to continue.</string>
+
     <!-- Content Descriptions -->
     <string name="cd_status_indicator">Service status indicator</string>
     <!-- Dialogs -->

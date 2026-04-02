@@ -950,7 +950,7 @@ class MonitoringForegroundServiceTest {
     // ==================== buildPingRequest Tests ====================
 
     @Test
-    fun `buildPingRequest returns correct timezone`() {
+    fun `buildPingRequest returns correct timezone`() = runBlocking {
         val request = service.buildPingRequest()
 
         assertEquals(
@@ -961,7 +961,7 @@ class MonitoringForegroundServiceTest {
     }
 
     @Test
-    fun `buildPingRequest returns correct app version`() {
+    fun `buildPingRequest returns correct app version`() = runBlocking {
         val request = service.buildPingRequest()
 
         assertEquals(
@@ -972,7 +972,7 @@ class MonitoringForegroundServiceTest {
     }
 
     @Test
-    fun `buildPingRequest returns accessibilityEnabled true when service is enabled`() {
+    fun `buildPingRequest returns accessibilityEnabled true when service is enabled`() = runBlocking {
         // Accessibility is enabled in setUp()
         val request = service.buildPingRequest()
 
@@ -983,7 +983,7 @@ class MonitoringForegroundServiceTest {
     }
 
     @Test
-    fun `buildPingRequest returns accessibilityEnabled false when service is disabled`() {
+    fun `buildPingRequest returns accessibilityEnabled false when service is disabled`() = runBlocking {
         // Disable Accessibility Service
         Settings.Secure.putString(
             RuntimeEnvironment.getApplication().contentResolver,
@@ -1000,7 +1000,7 @@ class MonitoringForegroundServiceTest {
     }
 
     @Test
-    fun `buildPingRequest returns lyftRunning false when Lyft not in foreground`() {
+    fun `buildPingRequest returns lyftRunning false when Lyft not in foreground`() = runBlocking {
         // Robolectric has no running tasks by default → LyftAppMonitor returns false
         val request = service.buildPingRequest()
 
@@ -1011,7 +1011,7 @@ class MonitoringForegroundServiceTest {
     }
 
     @Test
-    fun `buildPingRequest returns screenOn from PowerManager`() {
+    fun `buildPingRequest returns screenOn from PowerManager`() = runBlocking {
         // Robolectric PowerManager.isInteractive defaults to true
         val request = service.buildPingRequest()
 
@@ -1022,7 +1022,7 @@ class MonitoringForegroundServiceTest {
     }
 
     @Test
-    fun `buildPingRequest returns screenOn false when screen is off`() {
+    fun `buildPingRequest returns screenOn false when screen is off`() = runBlocking {
         val pm = RuntimeEnvironment.getApplication()
             .getSystemService(Context.POWER_SERVICE) as PowerManager
         val shadowPm = Shadows.shadowOf(pm)
@@ -1038,7 +1038,7 @@ class MonitoringForegroundServiceTest {
     }
 
     @Test
-    fun `buildPingRequest uses pendingStats for stats`() {
+    fun `buildPingRequest uses pendingStats for stats`() = runBlocking {
         service.pendingStats.incrementCycles()
         service.pendingStats.incrementCycles()
         service.pendingStats.addRidesFound(3)
@@ -1067,7 +1067,7 @@ class MonitoringForegroundServiceTest {
     }
 
     @Test
-    fun `buildPingRequest includes accept failures from pendingStats`() {
+    fun `buildPingRequest includes accept failures from pendingStats`() = runBlocking {
         val failure = com.skeddy.network.models.AcceptFailure(
             reason = "AcceptButtonNotFound",
             ridePrice = 25.50,
