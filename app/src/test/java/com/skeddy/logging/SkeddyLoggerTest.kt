@@ -446,9 +446,6 @@ class SkeddyLoggerTest {
         SkeddyLogger.i("Tag", "Test message")
         SkeddyLogger.flush()
 
-        // Wait for async write to complete
-        Thread.sleep(100)
-
         val fileContent = logFile.readText()
         assertTrue(fileContent.contains("Test message"))
     }
@@ -458,7 +455,6 @@ class SkeddyLoggerTest {
         // Write some logs
         SkeddyLogger.i("Tag", "Persisted message")
         SkeddyLogger.flush()
-        Thread.sleep(100)
 
         // Reset and reinitialize
         SkeddyLogger.reset()
