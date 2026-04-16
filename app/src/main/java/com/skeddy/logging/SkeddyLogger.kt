@@ -12,6 +12,7 @@ import java.util.Date
 import java.util.Locale
 import java.util.concurrent.ConcurrentLinkedDeque
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -240,10 +241,13 @@ object SkeddyLogger {
 
     /**
      * Примусово записує всі pending логи у файл.
+     * Блокує до завершення запису (з таймаутом 5 секунд).
      */
     fun flush() {
-        writeExecutor.execute {
-            flushToFile()
+        try {
+            writeExecutor.submit { flushToFile() }.get(5, TimeUnit.SECONDS)
+        } catch (e: Exception) {
+            Log.e(TAG, "flush() failed", e)
         }
     }
 
