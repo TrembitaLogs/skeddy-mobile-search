@@ -1,5 +1,7 @@
 package com.skeddy.service
 
+import android.Manifest
+import android.app.Application
 import android.content.ComponentCallbacks2
 import android.content.ComponentName
 import android.content.Context
@@ -61,6 +63,14 @@ class MonitoringForegroundServiceTest {
         RuntimeEnvironment.getApplication()
             .getSharedPreferences(STATE_PREFS_NAME, Context.MODE_PRIVATE)
             .edit().clear().apply()
+
+        // Grant runtime location permissions so that the FGS-type=location
+        // guard in onStartCommand() does not stop the service before it can start.
+        val application = RuntimeEnvironment.getApplication() as Application
+        Shadows.shadowOf(application).grantPermissions(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        )
 
         // Enable Accessibility Service so that performMonitoringCycle() step 0 check passes.
         // Without this, the service would stop itself (NOT_CONFIGURED state).
