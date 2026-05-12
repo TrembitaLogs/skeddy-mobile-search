@@ -93,7 +93,18 @@ object LyftAppMonitor {
         if (accessibilityPackage != null) {
             val isLyft = accessibilityPackage == LYFT_DRIVER_PACKAGE
             Log.d(TAG, "isLyftInForeground: Accessibility reports '$accessibilityPackage', isLyft=$isLyft")
-            return isLyft
+            if (!isLyft) return false
+
+            // Cross-check against current accessibility windows: lastForegroundPackage is
+            // ignored on launcher/systemui transitions, so the user manually leaving Lyft
+            // for the home screen leaves a stale 'com.lyft.android.driver' tracked value.
+            // Active windows are authoritative.
+            val instance = SkeddyAccessibilityService.getInstance()
+            if (instance != null && !instance.isPackageInActiveAppWindows(LYFT_DRIVER_PACKAGE)) {
+                Log.w(TAG, "isLyftInForeground: stale tracked value — Lyft not present in active windows; reporting not-foreground")
+                return false
+            }
+            return true
         }
 
         // Fallback: deprecated getRunningTasks (unreliable on Android 5+)

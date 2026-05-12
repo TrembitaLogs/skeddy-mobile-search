@@ -88,6 +88,27 @@ class SkeddyAccessibilityService : AccessibilityService() {
 
     private var debugReceiver: BroadcastReceiver? = null
 
+    /**
+     * Cross-checks whether [packageName] currently owns an active application window.
+     * Use this to detect stale [lastForegroundPackage]: when the user leaves Lyft for
+     * a launcher/systemui, those transitions are filtered out by [isTransitionalPackage],
+     * so the tracked package can lag behind reality. Active windows are authoritative.
+     *
+     * @return true if any TYPE_APPLICATION window currently reports [packageName].
+     */
+    fun isPackageInActiveAppWindows(packageName: String): Boolean {
+        return try {
+            val activeWindows = windows ?: return false
+            activeWindows.any { window ->
+                window.type == AccessibilityWindowInfo.TYPE_APPLICATION &&
+                    window.root?.packageName?.toString() == packageName
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "isPackageInActiveAppWindows: failed", e)
+            false
+        }
+    }
+
     override fun onServiceConnected() {
         super.onServiceConnected()
         instance = this
