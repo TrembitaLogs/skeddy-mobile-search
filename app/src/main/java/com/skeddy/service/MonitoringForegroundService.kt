@@ -1,5 +1,6 @@
 package com.skeddy.service
 
+import android.Manifest
 import android.app.AlarmManager
 import android.app.Notification
 import android.app.NotificationChannel
@@ -15,6 +16,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.os.Binder
 import android.os.Build
 import android.os.Handler
@@ -506,6 +508,14 @@ class MonitoringForegroundService : Service() {
         when (intent?.action) {
             ACTION_START -> {
                 Log.i(TAG, "onStartCommand: ACTION_START received")
+                // FGS type=location requires runtime location grant on Android 14+,
+                // otherwise startForeground() throws SecurityException and crashes the process.
+                // Returning START_NOT_STICKY prevents the system from re-delivering this intent in a loop.
+                if (!hasLocationPermission()) {
+                    Log.w(TAG, "onStartCommand: ACTION_START aborted — location permission not granted; stopping self")
+                    stopSelf(startId)
+                    return START_NOT_STICKY
+                }
                 // Always call startForeground() to satisfy the system contract
                 // (startForegroundService must be followed by startForeground within ~10s)
                 startForeground(SkeddyNotificationManager.NOTIFICATION_MONITORING_ID, createNotification())
@@ -539,6 +549,11 @@ class MonitoringForegroundService : Service() {
                 // Default behavior: start monitoring if not already running
                 Log.d(TAG, "onStartCommand: No action or unknown action (${intent?.action}), starting if not monitoring")
                 if (!isMonitoring) {
+                    if (!hasLocationPermission()) {
+                        Log.w(TAG, "onStartCommand: default-start aborted — location permission not granted; stopping self")
+                        stopSelf(startId)
+                        return START_NOT_STICKY
+                    }
                     startForeground(SkeddyNotificationManager.NOTIFICATION_MONITORING_ID, createNotification())
                     startMonitoring()
                     Log.i(TAG, "onStartCommand: Started monitoring via default action")
@@ -548,6 +563,11 @@ class MonitoringForegroundService : Service() {
 
         // START_STICKY ensures the service restarts if killed by the system
         return START_STICKY
+    }
+
+    private fun hasLocationPermission(): Boolean {
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
     }
 
     override fun onBind(intent: Intent?): IBinder {

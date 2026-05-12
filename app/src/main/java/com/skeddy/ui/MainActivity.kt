@@ -517,12 +517,12 @@ class MainActivity : AppCompatActivity() {
         updateServiceStatus()
         updateAccessibilityStatusInMonitorTab()
         bindMonitoringService()
-        ensureMonitoringServiceStarted()
         registerMonitoringReceiver()
         requestServiceState()
 
-        // Check permissions in sequence: Battery Optimization -> Notifications
-        // (Accessibility is already verified by AppStateDeterminer above)
+        // FGS type=location requires runtime ACCESS_FINE/COARSE_LOCATION grant on Android 14+,
+        // so ensureMonitoringServiceStarted() is deferred until checkPermissionsInSequence()
+        // confirms Location is granted (see Step 3).
         checkPermissionsInSequence()
     }
 
@@ -560,6 +560,9 @@ class MainActivity : AppCompatActivity() {
             return // Wait for location to be granted
         }
         dismissLocationDialogIfShowing()
+
+        // All FGS-blocking permissions are granted now — safe to start the foreground service.
+        ensureMonitoringServiceStarted()
 
         // Step 4: Check Notification Permission (only after previous permissions are granted)
         checkNotificationPermission()
@@ -1040,7 +1043,13 @@ class MainActivity : AppCompatActivity() {
         appendLog("New ride found: \$$price from $pickup")
     }
 
+    private var isMonitoringReceiverRegistered = false
+
     private fun registerMonitoringReceiver() {
+        if (isMonitoringReceiverRegistered) {
+            Log.d(TAG, "registerMonitoringReceiver: already registered, skipping")
+            return
+        }
         val filter = IntentFilter().apply {
             addAction(MonitoringForegroundService.ACTION_MONITORING_STATUS)
             addAction(MonitoringForegroundService.ACTION_NEW_RIDE_FOUND)
@@ -1053,15 +1062,17 @@ class MainActivity : AppCompatActivity() {
         } else {
             registerReceiver(monitoringReceiver, filter)
         }
+        isMonitoringReceiverRegistered = true
         Log.d(TAG, "Monitoring receiver registered")
     }
 
     private fun unregisterMonitoringReceiver() {
-        try {
-            unregisterReceiver(monitoringReceiver)
-            Log.d(TAG, "Monitoring receiver unregistered")
-        } catch (e: IllegalArgumentException) {
-            Log.w(TAG, "Receiver was not registered: ${e.message}")
+        if (!isMonitoringReceiverRegistered) {
+            Log.d(TAG, "unregisterMonitoringReceiver: not registered, skipping")
+            return
         }
+        unregisterReceiver(monitoringReceiver)
+        isMonitoringReceiverRegistered = false
+        Log.d(TAG, "Monitoring receiver unregistered")
     }
 }

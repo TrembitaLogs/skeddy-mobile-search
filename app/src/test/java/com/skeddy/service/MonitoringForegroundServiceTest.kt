@@ -1,5 +1,7 @@
 package com.skeddy.service
 
+import android.Manifest
+import android.app.Application
 import android.content.ComponentCallbacks2
 import android.content.ComponentName
 import android.content.Context
@@ -61,6 +63,16 @@ class MonitoringForegroundServiceTest {
         RuntimeEnvironment.getApplication()
             .getSharedPreferences(STATE_PREFS_NAME, Context.MODE_PRIVATE)
             .edit().clear().apply()
+
+        // Grant only ACCESS_COARSE_LOCATION so the FGS-type=location guard in
+        // onStartCommand() passes (it accepts FINE OR COARSE), while
+        // LocationCollector.collect() — which checks only ACCESS_FINE_LOCATION —
+        // returns null immediately instead of awaiting FusedLocationProviderClient,
+        // which would hang under Robolectric without Google Play Services shadows.
+        val application = RuntimeEnvironment.getApplication() as Application
+        Shadows.shadowOf(application).grantPermissions(
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        )
 
         // Enable Accessibility Service so that performMonitoringCycle() step 0 check passes.
         // Without this, the service would stop itself (NOT_CONFIGURED state).
