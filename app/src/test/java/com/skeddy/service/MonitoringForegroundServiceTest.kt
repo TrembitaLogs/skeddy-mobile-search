@@ -64,11 +64,13 @@ class MonitoringForegroundServiceTest {
             .getSharedPreferences(STATE_PREFS_NAME, Context.MODE_PRIVATE)
             .edit().clear().apply()
 
-        // Grant runtime location permissions so that the FGS-type=location
-        // guard in onStartCommand() does not stop the service before it can start.
+        // Grant only ACCESS_COARSE_LOCATION so the FGS-type=location guard in
+        // onStartCommand() passes (it accepts FINE OR COARSE), while
+        // LocationCollector.collect() — which checks only ACCESS_FINE_LOCATION —
+        // returns null immediately instead of awaiting FusedLocationProviderClient,
+        // which would hang under Robolectric without Google Play Services shadows.
         val application = RuntimeEnvironment.getApplication() as Application
         Shadows.shadowOf(application).grantPermissions(
-            Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION
         )
 
