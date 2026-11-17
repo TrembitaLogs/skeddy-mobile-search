@@ -4,7 +4,7 @@ Device-side Android app for the Skeddy driver platform — runs on a dedicated d
 
 ## Stack
 
-Kotlin · Android (minSdk 28, targetSdk 34) · Coroutines · Room · WorkManager · Retrofit · OkHttp · kotlinx.serialization · EncryptedSharedPreferences · Play Services Location · Material · GitHub Actions · DigitalOcean Spaces
+Kotlin · Android (minSdk 28, targetSdk 34) · Coroutines · Room · WorkManager · Retrofit · OkHttp · kotlinx.serialization · EncryptedSharedPreferences · Play Services Location · Material · GitHub Actions · Contabo Object Storage
 
 ## Status
 
